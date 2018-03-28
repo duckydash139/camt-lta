@@ -45,33 +45,17 @@ export default {
       let token = null
       let course = null
 
-      if(!this.$store.state.user.user) {
-        setTimeout(() => {
-          token = this.$store.state.user.token
-          studentId = this.$store.state.user.user.studentId
-          course = this.$store.state.user.user.trackingId
+      token = this.$store.state.user.token
+      studentId = this.$store.state.user.user.studentId
+      course = this.$store.state.user.user.trackingId
 
-          // fetch criteria
-          axios.get(`/api/criteria/${course}`)
-          .then(({ data }) => this.criteria = data)
+      // fetch criteria
+      axios.get(`/api/criteria/${course}`)
+      .then(({ data }) => this.criteria = data)
 
-          // fetch student's score
-          axios.get(`/api/users/${studentId}/${course}/score`, {headers: {token}})
-          .then(({ data }) => this.currentScore = data)
-        }, 500)
-      } else {
-        token = this.$store.state.user.token
-        studentId = this.$store.state.user.user.studentId
-        course = this.$store.state.user.user.trackingId
-
-        // fetch criteria
-        axios.get(`/api/criteria/${course}`)
-        .then(({ data }) => this.criteria = data)
-
-        // fetch student's score
-        axios.get(`/api/users/${studentId}/${course}/score`, {headers: {token}})
-        .then(({ data }) => this.currentScore = data)
-      }
+      // fetch student's score
+      axios.get(`/api/users/${studentId}/${course}/score`, {headers: {token}})
+      .then(({ data }) => this.currentScore = data)
     },
     fetchScore (index) {
       let result = 0
@@ -81,6 +65,11 @@ export default {
         }
       })
       return result
+    }
+  },
+  mounted () {
+    if (this.signedIn) {
+      this.initData()
     }
   },
   computed: {
@@ -104,8 +93,12 @@ export default {
       return points
     }
   },
-  mounted () {
-    this.initData()
+  watch: {
+    signedIn (value) {
+      if (value) {
+        this.initData()
+      }
+    }
   }
 }
 </script>

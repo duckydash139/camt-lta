@@ -33,7 +33,7 @@
 <script>
 import _ from 'lodash'
 export default {
-  props: ['value', 'dropdown'],
+  props: ['value', 'dropdown', 'unity'],
   data () {
     return {
       list: []
@@ -58,17 +58,12 @@ export default {
       let result = false
       dropdown.map(item => {
         if (id === item.id) {
-          if (
-            item.formula !== null ||
-            item.formula === 'depends on admin'
-          ) {
-            result = true
-            if (
-              item.formula.search('each') > 0 ||
-              item.formula.search('max') > 0
-            ) {
-              result = true
-            }
+          if (item.formula !== null) {
+            const criteria = item.formula === 'depends on admin' ||
+            item.formula.search('each') > 0 ||
+            item.formula.search('max') > 0
+
+            result = criteria
           }
         }
       })
@@ -84,7 +79,14 @@ export default {
         }
       })
 
-      return _.sortBy(buffer, 'id')
+      let result = _.sortBy(buffer, 'id')
+
+      // check is it unity?
+      if (typeof this.unity === 'undefined') {
+        result = _.filter(buffer, item => item.formula !== '(participants/total)*max')
+      }
+
+      return result
     }
   },
   computed: {

@@ -57,12 +57,14 @@ export const actions = {
             commit('clearData')
             localStorage.removeItem('token')
             this.app.router.push('/')
+            location.reload()
           }
         }, 2000)
       } else {
         commit('clearData')
         localStorage.removeItem('token')
         this.app.router.push('/')
+        location.reload()
       }
     }
     // console.log('failed: tryToSignin')
@@ -70,6 +72,8 @@ export const actions = {
   signout ({commit, dispatch}) {
     commit('clearData')
     localStorage.removeItem('token')
+    this.app.router.push('/')
+    location.reload()
     // console.log('finished: signout')
   },
   async setCourse ({state, commit, dispatch}, payload) {
@@ -82,6 +86,7 @@ export const actions = {
     if (success === true) {
       commit('setCourseId', payload)
       this.app.router.push('/')
+      location.reload()
     }
   }
 }

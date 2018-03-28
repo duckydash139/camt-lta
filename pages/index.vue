@@ -36,13 +36,6 @@ export default {
   },
   mounted () {
     this.fetchData()
-
-    setTimeout(() => {
-      const profile = this.signedIn
-      if (!profile.tracking || profile.tracking === 0) {
-        this.$router.push('/courses')
-      }
-    }, 500)
   },
   methods: {
     async fetchData () {
@@ -60,6 +53,13 @@ export default {
     ...mapGetters({
       signedIn: 'user/user'
     })
+  },
+  watch: {
+    signedIn (value) {
+      if (!value.tracking || value.tracking === 0) {
+        this.$router.push('/courses')
+      }
+    }
   }
 }
 </script>

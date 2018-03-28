@@ -83,10 +83,12 @@ export default {
       signedIn: 'user/user'
     })
   },
-  mounted () {
-    setTimeout(() => {
-      this.getData()
-    }, 500)
+  watch: {
+    signedIn (value) {
+      if (value) {
+        this.getData()
+      }
+    }
   }
 }
 </script>

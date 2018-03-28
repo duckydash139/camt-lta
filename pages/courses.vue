@@ -27,14 +27,8 @@ export default {
     ScoreCard,
     CourseCard
   },
-  computed: {
-    ...mapGetters({
-      signedIn: 'user/user'
-    })
-  },
-  mounted () {
-    //do something after mounting vue instance
-    setTimeout(() => {
+  methods: {
+    async initData () {
       let index = []
       const courses = [
         {
@@ -62,7 +56,24 @@ export default {
       filtered.map(idx => courses.splice(idx, 1))
 
       this.course = courses
-    }, 500)
+    }
+  },
+  computed: {
+    ...mapGetters({
+      signedIn: 'user/user'
+    })
+  },
+  mounted () {
+    if (this.signedIn) {
+      this.initData()
+    }
+  },
+  watch: {
+    signedIn (value) {
+      if (value) {
+        this.initData()
+      }
+    }
   }
 }
 </script>

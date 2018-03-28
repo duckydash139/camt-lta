@@ -11,6 +11,9 @@
 </template>
 
 <script>
+import {
+  mapGetters
+} from 'vuex'
 import axios from 'axios'
 import ContentGrid from '~/components/ContentGrid.vue'
 import RequestCard from '~/components/RequestCard.vue'
@@ -28,19 +31,10 @@ export default {
   },
   methods: {
     fetchData () {
-      if(!this.$store.state.user.user) {
-        setTimeout(() => {
-          let studentId = this.$store.state.user.user.studentId
-          let token = this.$store.state.user.token
-          axios.get(`/api/users/${studentId}/history/all?page=1`, {headers: { token }})
-          .then(({ data }) => this.activities = data)
-        }, 10)
-      } else {
-        let token = this.$store.state.user.token
-        let studentId = this.$store.state.user.user.studentId
-        axios.get(`/api/users/${studentId}/history/all?page=1`, {headers: { token }})
-        .then(({ data }) => this.activities = data)
-      }
+      let token = this.$store.state.user.token
+      let studentId = this.$store.state.user.user.studentId
+      axios.get(`/api/users/${studentId}/history/all?page=1`, {headers: { token }})
+      .then(({ data }) => this.activities = data)
     },
     async page (nextPage) {
       let studentId = this.$store.state.user.user.studentId
@@ -51,8 +45,23 @@ export default {
       loading.close()
     }
   },
+  computed: {
+    ...mapGetters({
+      signedIn: 'user/user',
+      storedScores: 'event/scores'
+    })
+  },
   mounted () {
-    this.fetchData()
+    if (this.signedIn) {
+      this.fetchData()
+    }
+  },
+  watch: {
+    signedIn (value) {
+      if (value) {
+        this.fetchData()
+      }
+    }
   }
 }
 </script>

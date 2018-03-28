@@ -56,7 +56,6 @@ export default {
   methods: {
     async initData () {
       const activityId = this.$route.params.id
-      console.log(activityId)
 
       let { data } = await axios.get(`/api/event/${activityId}`)
 

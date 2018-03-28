@@ -36,7 +36,7 @@
       </div>
     </div>
     <div class="column is-paddingless has-left-border is-4">
-      <ScoreEditor v-model="inputList" :dropdown="dropdowns"></ScoreEditor>
+      <ScoreEditor v-model="inputList" :dropdown="dropdowns" :unity="detail.unity"></ScoreEditor>
       <br>
       <textarea v-model="description" class="padding margin-left full-width textarea" placeholder="Write something here.." rows="3"></textarea><br>
       <div @click="checkInput" class="padding button is-info margin-left full-width">
@@ -74,13 +74,6 @@ export default {
     }
   },
   methods: {
-    async initData () {
-      setTimeout(() => {
-        const course = this.$store.state.user.user.trackingId
-        axios.get(`/api/criteria/${course}`)
-        .then(({ data }) => this.dropdowns = data.structure)
-      }, 10)
-    },
     checkInput () {
       if (!_.isEmpty(this.inputList)) {
         this.$store.commit('event/setScores', this.inputList)
@@ -109,8 +102,19 @@ export default {
       return `/event/${this.detail._id}`
     }
   },
-  created () {
-    this.initData()
+  mounted() {
+    if (this.signedIn) {
+      axios.get(`/api/criteria/${this.signedIn.trackingId}`)
+      .then(({ data }) => this.dropdowns = data.structure)
+    }
+  },
+  watch: {
+    signedIn (value) {
+      if (value.trackingId !== null) {
+        axios.get(`/api/criteria/${value.trackingId}`)
+        .then(({ data }) => this.dropdowns = data.structure)
+      }
+    }
   }
 }
 </script>
