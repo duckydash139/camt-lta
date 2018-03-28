@@ -1,0 +1,5 @@
+{
+  "name": "lta-camt",
+  "alias": "lta-camt",
+  "env": ".prod.env"
+}
