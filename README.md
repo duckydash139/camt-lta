@@ -1,6 +1,6 @@
-# camt-lta2
+# CAMT LTA
 
-> Nuxt.js project
+> CAMT - Learning Through Activities’ Tracking System
 
 ## Build Setup
 

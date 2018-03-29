@@ -35,13 +35,13 @@ export default {
           code: 955100,
           title: 'LEARNING THROUGH ACTIVITIES 1',
           condition: 'none',
-          img: 'https://www.tremblant.ca/-/media/tremblant/things-to-do/activities/activity-climbing-tour-escalade-m.ashx?h=432&w=768&hash=436046795AD01631924870F3BC3A7E8D3C19DFD5'
+          img: ''
         },
         {
           code: 955101,
           title: 'LEARNING THROUGH ACTIVITIES 2',
           condition: 'none',
-          img: 'http://www.skylineenterprises.co.nz/assets/Uploads/_resampled/SetHeight300-skyline-luge-mont-tremblant-fun-activity-YouTube-Channel-Art.jpg'
+          img: ''
         }
       ]
       let history = this.signedIn.history

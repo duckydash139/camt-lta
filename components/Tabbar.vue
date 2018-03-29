@@ -3,6 +3,9 @@
     <TabItem title="Home" to="/" :active="true">
       <b-icon pack="fa" icon="home"></b-icon>
     </TabItem>
+    <TabItem v-if="signedIn" title="History" to="/history" :active="true">
+      <b-icon pack="fa" icon="archive"></b-icon>
+    </TabItem>
     <TabItem v-if="signedIn" title="Notification" to="/notification" :active="true">
       <b-icon pack="fa" icon="bell"></b-icon>
     </TabItem>
