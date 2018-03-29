@@ -1,34 +1,62 @@
 <template>
   <div class="tabbar">
-    <!-- <slot></slot> -->
     <TabItem title="Home" to="/" :active="true">
       <b-icon pack="fa" icon="home"></b-icon>
     </TabItem>
-    <TabItem title="Notification" to="/notification" :active="true">
+    <TabItem v-if="signedIn" title="Notification" to="/notification" :active="true">
       <b-icon pack="fa" icon="bell"></b-icon>
     </TabItem>
-    <TabItem title="Logout" to="login" :active="false">
+    <a v-if="signedIn" @click="signout" class="item is-unselectable">
       <b-icon pack="fa" icon="sign-out"></b-icon>
-    </TabItem>
+      <br>
+      Logout
+    </a>
+    <a v-else :href="signInUrl" class="item is-unselectable">
+      <b-icon pack="fa" icon="sign-in"></b-icon>
+      <br>
+      Login
+    </a>
   </div>
 </template>
 <script>
+import { mapGetters } from 'vuex'
 import TabItem from '~/components/TabItem.vue'
 
 export default {
   data () {
     return {
-
+      signInUrl: `https://oauth.cmu.ac.th/v1/Authorize.aspx?response_type=code&client_id=${process.env.CMU_CLIENT_ID}&redirect_uri=${process.env.CMU_REDIRECT_URI}&scope=basic`
     }
+  },
+  computed: {
+    ...mapGetters({
+      signedIn: 'user/user'
+    })
   },
   components: {
     TabItem
+  },
+  methods: {
+    signout () {
+      this.$store.dispatch('user/signout')
+    }
   }
 }
 </script>
 <style>
 .tabbar {
   display: none;
+}
+
+.item {
+  padding-top: 1.5vh;
+  height: 100%;
+  /*border: solid 1px red;*/
+  flex-grow: 1;
+  /*align-self: flex-end;*/
+  text-align: center;
+  font-size: 2vw;
+  color: #363636;
 }
 
 @media (max-width: 768px) {

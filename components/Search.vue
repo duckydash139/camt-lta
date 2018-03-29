@@ -1,86 +1,71 @@
 <template>
-<div class="search-wrapper">
-  <!-- <label>{{selectedEvent}}</label> -->
-  <vue-instant :suggestion-attribute="suggestionAttribute" v-model="value" :disabled="false" @input="changed1" @click-input="clickInput" @click-button="clickButton" @selected="selected" @enter="enter" @key-up="keyUp" @key-down="keyDown" @key-right="keyRight"
-      @clear="clear" @escape="escape" :show-autocomplete="true" :autofocus="false" :suggestions="suggestions" name="customName" placeholder="Search..." :custom-result="suggestions" type="custom"></vue-instant>
+<div id="">
+  <form @submit.prevent="search">
+    <div class="field has-addons">
+      <div class="control">
+        <input ref="query" v-model="query" class="input" type="text" placeholder="Search...">
+      </div>
+      <div class="control">
+        <button class="button">
+          Go
+        </button>
+      </div>
+    </div>
+  </form>
 </div>
 </template>
 
 <script>
-import axios from 'axios'
-import Fuse from 'fuse.js'
-import VueInstant from '~/components/VueInstant.vue'
-
 export default {
-  components: {
-    VueInstant
-  },
-  data () {
+  data() {
     return {
-      value: '',
-      suggestionAttribute: 'title',
-      suggestions: [],
-      selectedEvent: '',
-      options: {
-        keys: ['title', 'location', 'description']
-      }
+      query: ''
     }
   },
   methods: {
-    clickInput () {
-      this.selectedEvent = 'click input'
-    },
-    clickButton () {
-      this.selectedEvent = 'click button'
-    },
-    selected () {
-      this.selectedEvent = 'selection changed'
-    },
-    enter () {
-      this.selectedEvent = 'enter'
-    },
-    keyUp () {
-      this.selectedEvent = 'keyup pressed'
-    },
-    keyDown () {
-      this.selectedEvent = 'keyDown pressed'
-    },
-    keyRight () {
-      this.selectedEvent = 'keyRight pressed'
-    },
-    clear () {
-      this.selectedEvent = 'clear input'
-    },
-    escape () {
-      this.selectedEvent = 'escape'
-    },
-    changed () {
-      var that = this
-      this.suggestions = []
-      axios.get('https://api.themoviedb.org/3/search/movie?api_key=342d3061b70d2747a1e159ae9a7e9a36&query=' + this.value)
-        .then(function (response) {
-          // console.log(response)
-          response.data.results.forEach(function (a) {
-            that.suggestions.push(a)
-            console.log(that.suggestions)
-          })
-        })
-    },
-    async changed1 () {
-      // let that = this
-      this.suggestions = []
-      const response = await axios.get(`/api/event?keyword=${this.value}`)
-      // console.log(response.data)
-      // const res = await this.$search(this.value, response.data, this.options)
-      // console.log(res)
-      const fuse = new Fuse(response.data, this.options)
-      this.suggestions = fuse.search(this.value)
-      // response.data.forEach((a) => that.suggestions.push(a))
-      // console.log(this.suggestions)
+    search () {
+      this.$router.push(`/search?q=${this.query}`)
+      this.query = ''
+      this.$refs.query.blur()
     }
   }
 }
 </script>
-<style>
-
+<style scoped>
+.field {
+  padding-left: 10vw;
+}
+input, input:focus {
+  width: 25vw;
+  background: #EDEDED;
+  box-shadow: inset 0 0 0 0px #EDEDED;
+  border: 0;
+  border-radius: 11px;
+}
+button {
+  width: 5vw;
+  border-radius: 11px;
+  border: solid 1px #EDEDED;
+}
+.button:hover, .button:active, .button:focus {
+  outline: 0;
+  box-shadow: none;
+  border: solid 1px #EDEDED;
+}
+@media (max-width: 768px) {
+  .field {
+    padding-left: 0vw;
+  }
+  input {
+    width: 50vw;
+    background: #EDEDED;
+    box-shadow: inset 0 0 0 0px #EDEDED;
+    border: 0;
+    border-radius: 11px;
+  }
+  button {
+    width: 15vw;
+    border-radius: 11px;
+  }
+}
 </style>

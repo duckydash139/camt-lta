@@ -52,7 +52,7 @@ export default {
   data () {
     return {
       isActive: false,
-      signInUrl: 'https://oauth.cmu.ac.th/v1/Authorize.aspx?response_type=code&client_id=xw0ZfA017VkD7MYDMzvudQVzmJsJKWnhvtMZFvrr&redirect_uri=https://lta-camt.now.sh/oauth/callback&scope=basic',
+      signInUrl: `https://oauth.cmu.ac.th/v1/Authorize.aspx?response_type=code&client_id=${process.env.CMU_CLIENT_ID}&redirect_uri=${process.env.CMU_REDIRECT_URI}&scope=basic`,
       activeBadge: false
     }
   },
