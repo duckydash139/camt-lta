@@ -110,10 +110,16 @@ export default {
     }
   },
   mounted () {
-    this.fetchState()
+    if (this.signedIn) {
+      this.fetchState()
+    }
   },
-  updated () {
-    this.fetchState()
+  watch: {
+    signedIn (value) {
+      if (value) {
+        this.fetchState()
+      }
+    }
   }
 }
 </script>
