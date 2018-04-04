@@ -82,7 +82,7 @@ export default {
       let result = _.sortBy(buffer, 'id')
 
       // check is it unity?
-      if (typeof this.unity === 'undefined') {
+      if (typeof this.unity === 'undefined' || !this.unity) {
         result = _.filter(buffer, item => item.formula !== '(participants/total)*max')
       }
 
