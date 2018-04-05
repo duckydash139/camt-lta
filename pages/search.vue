@@ -26,7 +26,6 @@ export default {
   methods: {
     async fetchData () {
       const { data } = await axios.get(`/api/event?keyword=${this.$route.query.q}`)
-      console.log(data)
       this.activities = data
     }
   },

@@ -136,7 +136,7 @@ export const grading = {
     })
     return data
   },
-  sum (scores) {
+  sum (scores, criteria) {
     let buffer = []
 
     for (let item of scores) {
@@ -150,19 +150,31 @@ export const grading = {
       })
       isNewItem ? buffer.push(item) : false
     }
+
+    buffer.map(score => {
+      criteria.map(item => {
+        if (score.id === item.id) {
+          if (score.point >= item.max) {
+            score.point = item.max
+          }
+        }
+      })
+    })
+
     return buffer
   },
   async student (studentId, courseId) {
     let result = []
-    const student = await Users.findOne({student_id: studentId})
+    // const student = await Users.findOne({student_id: studentId})
     const data = await Records.find({'student_id': studentId, 'batch_id': courseId, 'status.approved': true})
+    const criteria = await Criteria.findOne({batch_id: courseId})
 
     for (let item of data) {
       const score = await this.compute(item)
       result.push(...score)
     }
 
-    const total = this.sum(result)
+    const total = this.sum(result, criteria.structure)
 
     return total
   }
