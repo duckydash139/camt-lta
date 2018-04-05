@@ -15,7 +15,7 @@ const app = express()
 const host = process.env.HOST
 const port = process.env.PORT
 
-app.use(urlencoded({ extended: true }))
+app.use(urlencoded({ limit: '10mb', extended: true }))
 app.use(json())
 app.set('port', port)
 

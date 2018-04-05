@@ -3,7 +3,9 @@ import qs from 'querystring'
 import jwt from 'jsonwebtoken'
 
 import {
+  Activities,
   Batches,
+  Criteria,
   Notifications,
   Records,
   Users
@@ -195,6 +197,55 @@ export const index = {
 
       const data = await grading.student(studentId, courseId)
       res.status(200).json(data)
+    } catch (e) {
+      res.status(409).json({status: 'error', message: e})
+    }
+  },
+  async exportHistory (req, res, next) {
+    try {
+      const studentId = Number(req.params.id)
+      const courseId = req.params.course
+
+      let buffer = []
+
+      const records = await Records.find({student_id: studentId, course_id: courseId})
+
+      for (let item of records) {
+        if (item.status.approved !== false) {
+          const event = await Activities.findOne({_id: item.activity_id})
+          const { structure } = await Criteria.findOne({batch_id: item.batch_id})
+
+          let scoresBuffer = []
+
+          item.scores.map(score => {
+            structure.map(criteria => {
+              if (criteria.id === score.id) {
+                scoresBuffer.push({
+                  id: score.id,
+                  title: criteria.title || 'error',
+                  count: score.count,
+                  point: score.point
+                })
+              }
+            })
+          })
+
+          buffer.push({
+            event: {
+              id: item.activity_id,
+              title: event.title,
+              date: event.date,
+              location: event.location,
+              description: event.description
+            },
+            comment: item.description,
+            picture: item.picture,
+            status: item.status,
+            scores: scoresBuffer
+          })
+        }
+      }
+      res.status(200).json(buffer)
     } catch (e) {
       res.status(409).json({status: 'error', message: e})
     }

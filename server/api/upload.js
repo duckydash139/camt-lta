@@ -1,9 +1,6 @@
-// import {Router} from 'express'
 import multer from 'multer'
 import jimp from 'jimp'
 import uuid from 'uuid'
-
-// const router = Router()
 
 const multerOptions = {
   storage: multer.memoryStorage(),
@@ -32,12 +29,3 @@ export const uploader = {
     next()
   }
 }
-
-// router.post('/uploader', uploader.upload, uploader.resize,
-//   function (req, res) {
-//     console.log(req.body.photo)
-//     res.status(200).json({message: 'uploaded'})
-//   }
-// )
-//
-// export default router
