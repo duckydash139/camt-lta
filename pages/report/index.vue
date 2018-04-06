@@ -72,7 +72,9 @@ export default {
     }
   },
   mounted () {
-    this.fetchData()
+    if (this.signedIn) {
+      this.fetchData()
+    }
   },
   computed: {
     ...mapGetters({
