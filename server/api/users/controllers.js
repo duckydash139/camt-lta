@@ -11,7 +11,7 @@ import {
   Users
 } from '../models'
 
-import { grading } from '../helpers'
+import { grading, generatePdf } from '../helpers'
 
 const createToken = (payload) => {
   const token = jwt.sign(payload, process.env.SECRET, {expiresIn: '2h'})
@@ -209,6 +209,7 @@ export const index = {
       let buffer = []
 
       const records = await Records.find({student_id: studentId, course_id: courseId})
+      const student = await Users.findOne({student_id: studentId})
 
       for (let item of records) {
         if (item.status.approved !== false) {
@@ -245,7 +246,23 @@ export const index = {
           })
         }
       }
-      res.status(200).json(buffer)
+      const profile = {
+        student_id: studentId,
+        course_id: courseId,
+        first_name: student.first_name,
+        last_name: student.last_name
+      }
+      generatePdf(profile, buffer, (binary) => {
+        // res.contentType('application/pdf')
+        // console.log('binary')
+        // console.log(binary)
+        // res.send(binary)
+        const filename = `${studentId}_${courseId}.pdf`
+
+        res.setHeader('Content-Type', 'application/pdf')
+        res.setHeader('Content-Disposition', `attachment; filename=${filename}`)
+        res.end(binary, 'binary')
+      })
     } catch (e) {
       res.status(409).json({status: 'error', message: e})
     }

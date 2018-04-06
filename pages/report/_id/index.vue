@@ -8,15 +8,12 @@ import pdfFonts from '~/assets/vfs_fonts'
 import moment from 'moment'
 import { mapGetters } from 'vuex'
 import axios from 'axios'
-var requireContext = require('require-context')
-
-let images = require.context('~/static/uploads/', false, /\.png$/)
 
 export default {
   layout: 'oauth',
   methods: {
     async initData () {
-      const { data } = await axios(`/api/users/562110139/955101/export`)
+      const { data } = await axios(`/api/users/562110139/955100/export`)
 
       pdfMake.vfs = pdfFonts.pdfMake.vfs
       pdfMake.fonts = {
@@ -155,7 +152,7 @@ export default {
       return schema
     },
     convertImgToBase64 (img) {
-      const imgUrl = images(`./${img}`)
+      const imgUrl = require(`~/static/uploads/${img}`)
       console.log(imgUrl)
       let file = new Image()
       file.href = imgUrl
@@ -172,8 +169,8 @@ export default {
     })
   },
   mounted () {
-    this.convertImgToBase64('e8f8ccc6-a10b-4a5f-bcc5-87e831158a13.png')
-    // this.initData()
+    // this.convertImgToBase64('e8f8ccc6-a10b-4a5f-bcc5-87e831158a13.png')
+    this.initData()
   }
 }
 </script>

@@ -1,7 +1,11 @@
 import _ from 'lodash'
+import moment from 'moment'
+
 import { Criteria, Batches, Records, Users } from './models'
 
 import { Types } from 'mongoose'
+
+const pdfMakePrinter = require('pdfmake/src/printer')
 
 const ObjectId = Types.ObjectId
 
@@ -364,5 +368,147 @@ export const sheets = {
 
       return data
     }
+  }
+}
+
+export const generatePdf = (profile, data, callback) => {
+  const fontDescriptors = {
+    THSarabunNew: {
+      normal: './assets/fonts/THSarabunNew.ttf',
+      bold: './assets/fonts/THSarabunNew-Bold.ttf',
+      italics: './assets/fonts/THSarabunNew-Italic.ttf',
+      bolditalics: './assets/fonts/THSarabunNew-BoldItalic.ttf'
+    }
+  }
+  let schema = {
+    defaultStyle: {
+      font: 'THSarabunNew'
+    },
+    header: {
+      text: `generated at ${moment().format('DD/MM/YYYY LT')}`,
+      alignment: 'right'
+    },
+    content: [
+      {
+        text: checkCourseId(profile.course_id),
+        style: {
+          fontSize: 20,
+          bold: true
+        }
+      },
+      {
+        canvas: [
+          {
+            type: 'line',
+            x1: 0,
+            y1: 10,
+            x2: 515,
+            y2: 10,
+            lineWidth: 2
+          }
+        ]
+      },
+      {
+        text: `Student ID: ${profile.student_id}`,
+        margin: [0, 10, 0, 0]
+      },
+      {
+        text: `Name: ${profile.first_name} ${profile.last_name}`,
+        margin: [0, 0, 0, 30]
+      }
+    ]
+  }
+
+  data.map(item => schema.content.push(renderEvent(item)))
+
+  let printer = new pdfMakePrinter(fontDescriptors)
+
+  let doc = printer.createPdfKitDocument(schema)
+  let chunks = []
+  let result
+
+  doc.on('data', function (chunk) {
+    chunks.push(chunk)
+  })
+  doc.on('end', function () {
+    result = Buffer.concat(chunks)
+    callback('data:application/pdf;base64,' + result.toString('base64'))
+  })
+  doc.end()
+}
+
+function renderEvent (item) {
+  let buffer = []
+
+  item.scores.map(obj => {
+    buffer.push([
+      `${obj.title}`,
+      {
+        text: `${obj.point} pts`,
+        alignment: 'right'
+      }
+    ])
+  })
+  let schema = [
+    {
+      text: `${item.event.title}`,
+      style: {
+        fontSize: 18,
+        bold: true
+      }
+    },
+    {
+      columns: [
+        {
+          stack: [
+
+            {
+              text: `Date: ${moment(item.event.date).format('DD/MM/YYYY LT')}`
+            }, {
+              text: `Location: ${item.event.location}`
+            }, {
+              text: `Description: ${item.event.description}`,
+              margin: [0, 0, 0, 10]
+            },
+            {
+              image: `./static/uploads/${item.picture}`,
+              fit: [300, 300]
+            }
+          ],
+          width: '65%'
+        }, {
+          stack: [
+            {
+              text: 'Scores',
+              style: {
+                fontSize: 14,
+                bold: true
+              }
+            },
+            [
+              {
+                table: {
+                  body: buffer
+                },
+                layout: 'noBorders'
+              }
+            ]
+          ],
+          width: '*'
+        }
+      ],
+      columnGap: 10,
+      pageBreak: 'after'
+    }
+  ]
+
+  return schema
+}
+
+function checkCourseId (courseId) {
+  if (parseInt(courseId) === 955100) {
+    return '955100 - LEARNING THROUGH ACTIVITIES 1'
+  } else if (parseInt(courseId) === 955101) {
+    return '955101 - LEARNING THROUGH ACTIVITIES 2'
   }
 }
