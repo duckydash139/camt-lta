@@ -38,7 +38,7 @@ export default {
   },
   methods: {
     async fetchData () {
-      const token = this.$store.state.admin.token
+      const token = this.$store.state.user.token
       const { data } = await axios(`api/users/${this.signedIn.studentId}/history/check`, {
         headers: { token }
       })
@@ -56,7 +56,7 @@ export default {
       })
     },
     async downloadPdf (courseId) {
-      const token = this.$store.state.admin.token
+      const token = this.$store.state.user.token
 
       const { data } = await axios(`api/users/${this.signedIn.studentId}/${courseId}/export`, {
         headers: { token },
