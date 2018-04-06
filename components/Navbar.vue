@@ -18,6 +18,9 @@
         <router-link v-if="signedIn" to="/history" class="navbar-item">
           <span>History</span>
         </router-link>
+        <router-link v-if="signedIn" to="/report" class="navbar-item">
+          <span>Report</span>
+        </router-link>
         <b-dropdown v-if="signedIn" position="is-bottom-left">
           <a class="navbar-item is-unselectable" slot="trigger">
             <span class="">Notifications</span>
