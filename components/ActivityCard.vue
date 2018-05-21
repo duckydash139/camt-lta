@@ -14,11 +14,7 @@
       <div class="columns is-mobile">
         <div class="column">
           <p class="has-text-grey">Date</p>
-          <p class="normal-text">{{ eventDate }}</p>
-        </div>
-        <div class="column">
-          <p class="has-text-grey">Time</p>
-          <p class="normal-text">{{ eventTime }}</p>
+          <p class="normal-text">{{ dateFormat(detail.startAt) }} - {{ dateFormat(detail.endAt) }}</p>
         </div>
         <div class="column">
           <p class="has-text-grey">Location</p>
@@ -52,23 +48,27 @@ export default {
       required: true
     }
   },
-  data () {
+  data() {
     return {
       interestedButton: 'Interested'
     }
   },
   methods: {
-    enroll () {
+    enroll() {
       this.$router.push(`${this.eventRoute}/form`)
     },
-    async pin () {
+    async pin() {
       const text1 = 'Interested'
       const text2 = 'Not interested'
       const token = this.token
       const payload = {
         student_id: this.signedIn.studentId
       }
-      let { data } = await axios.post(`/api/event/${this.detail._id}/interest`, payload, {headers: {token}})
+      let { data } = await axios.post(
+        `/api/event/${this.detail._id}/interest`,
+        payload,
+        { headers: { token } }
+      )
       const { success } = data
       if (success === true) {
         this.interestedButton = text1
@@ -76,20 +76,27 @@ export default {
         this.interestedButton = text2
       }
     },
-    async fetchState () {
+    async fetchState() {
       const text1 = 'Interested'
       const text2 = 'Not interested'
       const token = this.token
       const payload = {
         student_id: this.signedIn.studentId
       }
-      let { data } = await axios.post(`/api/event/${this.detail._id}/check`, payload, {headers: {token}})
+      let { data } = await axios.post(
+        `/api/event/${this.detail._id}/check`,
+        payload,
+        { headers: { token } }
+      )
       const { success } = data
       if (success === false) {
         this.interestedButton = text1
       } else {
         this.interestedButton = text2
       }
+    },
+    dateFormat(date) {
+      return moment(date).format('DD/MMM/YY LT')
     }
   },
   computed: {
@@ -97,25 +104,17 @@ export default {
       signedIn: 'user/user',
       token: 'user/token'
     }),
-    eventDate () {
-      const date = new Date(this.detail.date)
-      return moment(date).format('DD MMM YY')
-    },
-    eventTime () {
-      const date = new Date(this.detail.date)
-      return moment(date).format('LT')
-    },
-    eventRoute () {
+    eventRoute() {
       return `/event/${this.detail._id}`
     }
   },
-  mounted () {
+  mounted() {
     if (this.signedIn) {
       this.fetchState()
     }
   },
   watch: {
-    signedIn (value) {
+    signedIn(value) {
       if (value) {
         this.fetchState()
       }

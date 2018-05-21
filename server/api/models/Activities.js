@@ -8,7 +8,11 @@ const schema = new mongoose.Schema({
     type: String,
     required: true
   },
-  date: {
+  startAt: {
+    type: Date,
+    required: true
+  },
+  endAt: {
     type: Date,
     required: true
   },

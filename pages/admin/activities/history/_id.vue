@@ -15,11 +15,7 @@
           <div class="columns is-mobile">
             <div class="column">
               <p class="has-text-grey">Date</p>
-              <p class="normal-text">{{ eventDate }}</p>
-            </div>
-            <div class="column">
-              <p class="has-text-grey">Time</p>
-              <p class="normal-text">{{ eventTime }}</p>
+              <p class="normal-text">{{ dateFormat(event.startAt) }} - {{ dateFormat(event.endAt) }}</p>
             </div>
             <div class="column">
               <p class="has-text-grey">Location</p>
@@ -48,28 +44,21 @@ export default {
   components: {
     ActivityCard
   },
-  data () {
+  data() {
     return {
       event: ''
     }
   },
   methods: {
-    async initData () {
+    async initData() {
       const activityId = this.$route.params.id
 
       let { data } = await axios.get(`/api/event/${activityId}`)
 
       this.event = data
-    }
-  },
-  computed: {
-    eventDate () {
-      const date = new Date(this.event.date)
-      return moment(date).format('DD MMM YY')
     },
-    eventTime () {
-      const date = new Date(this.event.date)
-      return moment(date).format('LT')
+    dateFormat(date) {
+      return moment(date).format('DD/MMM/YY LT')
     }
   },
   mounted() {

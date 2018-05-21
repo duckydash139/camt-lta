@@ -15,7 +15,10 @@
           </div>
           <div class="columns">
             <div class="column">
-              <datetime input-class="input" placeholder="Date" v-model="date" type="datetime" required></datetime>
+              <datetime input-class="input" placeholder="Start at" v-model="startAt" type="datetime" required></datetime>
+            </div>
+            <div class="column">
+              <datetime input-class="input" placeholder="End at" v-model="endAt" type="datetime" required></datetime>
             </div>
           </div>
           <div class="columns">
@@ -53,30 +56,33 @@ export default {
     ActivityCard,
     ContentGrid
   },
-  data () {
+  data() {
     return {
       title: '',
-      date: '',
+      startAt: '',
+      endAt: '',
       location: '',
       description: ''
     }
   },
   methods: {
-    async addActivity () {
+    async addActivity() {
       const loading = this.$loading.open()
       try {
         const token = this.token
         const payload = {
           title: this.title,
-          date: this.date,
+          startAt: this.startAt,
+          endAt: this.endAt,
           location: this.location,
           description: this.description,
           user: this.signedIn.id
         }
 
-        const event = await axios.post(`/api/event/add`,
+        const event = await axios.post(
+          `/api/event/add`,
           qs.stringify(payload),
-          {headers: { token }}
+          { headers: { token } }
         )
         loading.close()
         this.$router.push(`/event/${event.data.id}`)

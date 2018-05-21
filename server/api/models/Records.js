@@ -22,7 +22,7 @@ const schema = new mongoose.Schema({
     type: ObjectId,
     require: true
   },
-  description: String,
+  reflections: Array,
   scores: {
     type: [{
       _id: false,

@@ -246,9 +246,9 @@ export const student = {
 export const activity = {
   async add (req, res) {
     try {
-      const { title, date, location, description, unity, admin } = req.body
+      const { title, startAt, endAt, location, description, unity, admin } = req.body
 
-      const newActivity = new Activities({title, date, location, description, unity, createdBy: {admin}})
+      const newActivity = new Activities({title, startAt, endAt, location, description, unity, createdBy: {admin}})
       const added = await newActivity.save()
       res.status(201).json({success: true, message: 'created', id: added._id})
     } catch (e) {

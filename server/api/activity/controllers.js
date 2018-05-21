@@ -42,10 +42,10 @@ export const user = {
   },
   async add (req, res) {
     try {
-      const {title, date, location, description, user, admin} = req.body
+      const {title, startAt, endAt, location, description, user, admin} = req.body
       console.log(req.body)
 
-      const newActivity = new Activities({title, date, location, description, createdBy: {user, admin}})
+      const newActivity = new Activities({title, startAt, endAt, location, description, createdBy: {user, admin}})
       const added = await newActivity.save()
       res.status(201).json({success: true, message: 'created', id: added._id})
     } catch (e) {
@@ -55,14 +55,14 @@ export const user = {
   async search (req, res) {
     const id = req.params.id
     const activity = await Activities.findOne({_id: id})
-    const { title, date, location, description, unity } = activity
-    const payload = { _id: id, title, date, location, description, unity }
+    const { title, startAt, endAt, location, description, unity } = activity
+    const payload = { _id: id, title, startAt, endAt, location, description, unity }
     res.status(200).json(payload)
   },
   async submit (req, res) {
     try {
       const activity_id = req.params.id
-      const { course_id, description, student_id, scores, photo } = req.body
+      const { course_id, reflections, student_id, scores, photo } = req.body
 
       const student = await Users.findOne({student_id})
 
@@ -71,7 +71,7 @@ export const user = {
         activity_id,
         student_id,
         batch_id: student.tracking_id,
-        description,
+        reflections,
         scores,
         picture: photo,
         status: {

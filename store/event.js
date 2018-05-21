@@ -2,7 +2,7 @@ import axios from 'axios'
 
 export const state = () => ({
   eventId: null,
-  description: null,
+  reflections: null,
   scores: null,
   image: null
 })
@@ -14,8 +14,8 @@ export const mutations = {
   setEventId (state, payload) {
     state.eventId = payload
   },
-  setDescription (state, payload) {
-    state.description = payload
+  setReflections (state, payload) {
+    state.reflections = payload
   },
   saveImage (state, payload) {
     state.image = payload
@@ -24,6 +24,7 @@ export const mutations = {
     state.eventId = null
     state.scores = null
     state.image = null
+    state.reflections = null
   }
 }
 
@@ -36,13 +37,17 @@ export const actions = {
     data.append('course_id', rootState.user.user.tracking)
     data.append('activity_id', state.eventId)
     data.append('student_id', rootState.user.user.studentId)
-    data.append('description', state.description)
     data.append('photo', state.image)
+    // loop reflections to fill in form
+    for (let i = 0; i < state.reflections.length; i++) {
+      const item = state.reflections[i]
+      data.append(`reflections[${i}]`, item)
+    }
     // loop scores to fill in form
-    for (let i = 0; i < state.scores.length; i++) {
-      const item = state.scores[i]
-      data.append(`scores[${i}][id]`, item.id)
-      data.append(`scores[${i}][point]`, item.point || 0)
+    for (let j = 0; j < state.scores.length; j++) {
+      const item = state.scores[j]
+      data.append(`scores[${j}][id]`, item.id)
+      data.append(`scores[${j}][point]`, item.point || 0)
     }
     // submit data to api
     const result = await axios.post(`/api/event/${state.eventId}/add`, data, {
@@ -54,7 +59,7 @@ export const actions = {
 
     const { success, id } = result.data
     if (success === true && id) {
-      this.app.router.push(`/history/${id}`)
+      this.app.router.push(`/history/requests/${id}`)
       // clear data
       dispatch('clearForm')
     } else {
@@ -70,7 +75,7 @@ export const getters = {
   scores ({scores}) {
     return scores
   },
-  description ({description}) {
-    return description
+  reflections ({reflections}) {
+    return reflections
   }
 }
