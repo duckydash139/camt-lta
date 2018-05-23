@@ -12,7 +12,6 @@ function escapeRegex (text) {
 export const user = {
   async get (req, res) {
     if (req.query.keyword) {
-      console.log(req.query.keyword)
       try {
         const regex = new RegExp(escapeRegex(req.query.keyword), 'gi')
         const normalFuzzySearch = { $or: [ { 'title': regex }, { 'location': regex }, { 'description': regex } ] }
@@ -43,7 +42,7 @@ export const user = {
   async add (req, res) {
     try {
       const {title, startAt, endAt, location, description, user, admin} = req.body
-      console.log(req.body)
+      // console.log(req.body)
 
       const newActivity = new Activities({title, startAt, endAt, location, description, createdBy: {user, admin}})
       const added = await newActivity.save()

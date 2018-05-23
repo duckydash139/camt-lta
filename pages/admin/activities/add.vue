@@ -21,7 +21,7 @@
               <datetime input-class="input" placeholder="Start at" v-model="startAt" type="datetime" required></datetime>
             </div>
             <div class="column">
-              <datetime input-class="input" placeholder="End at" v-model="endAt" type="datetime" required></datetime>
+              <datetime input-class="input" placeholder="End at" v-model="endAt" :min-date="startAt" type="datetime" required></datetime>
             </div>
           </div>
           <div class="columns">

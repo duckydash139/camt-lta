@@ -4,6 +4,8 @@ export const state = () => ({
   eventId: null,
   reflections: null,
   scores: null,
+  participants: null,
+  file: null,
   image: null
 })
 
@@ -24,6 +26,8 @@ export const mutations = {
     state.eventId = null
     state.scores = null
     state.image = null
+    state.participants = null
+    state.file = null
     state.reflections = null
   }
 }
@@ -51,6 +55,46 @@ export const actions = {
     }
     // submit data to api
     const result = await axios.post(`/api/event/${state.eventId}/add`, data, {
+      headers: {
+        'Content-Type': 'multipart/form-data',
+        token: rootState.user.token
+      }
+    })
+
+    const { success, id } = result.data
+    if (success === true && id) {
+      this.app.router.push(`/history/requests/${id}`)
+      // clear data
+      dispatch('clearForm')
+    } else {
+      this.app.router.push('/')
+    }
+  },
+  async saveReport ({state, rootState, commit, dispatch}, payload) {
+    let data = new FormData()
+    // build form data
+    data.append('course_id', rootState.user.user.tracking)
+    data.append('activity_id', state.eventId)
+    data.append('student_id', rootState.user.user.studentId)
+    data.append('file', payload.file)
+    // loop reflections to fill in form
+    for (let i = 0; i < state.reflections.length; i++) {
+      const item = state.reflections[i]
+      data.append(`reflections[${i}]`, item)
+    }
+    // loop scores to fill in form
+    for (let j = 0; j < state.scores.length; j++) {
+      const item = state.scores[j]
+      data.append(`scores[${j}][id]`, item.id)
+      data.append(`scores[${j}][point]`, item.point || 0)
+    }
+    // loop participants to fill in form
+    for (let k = 0; k < payload.participants.length; k++) {
+      const item = payload.participants[j]
+      data.append(`participants[${k}]`, item)
+    }
+    // submit data to api
+    const result = await axios.post(`/api/event/${state.eventId}/addReport`, data, {
       headers: {
         'Content-Type': 'multipart/form-data',
         token: rootState.user.token

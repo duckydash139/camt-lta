@@ -34,9 +34,9 @@
     <div class="column is-paddingless has-left-border is-4">
       <ScoreEditor v-model="inputList" :dropdown="dropdowns" :unity="detail.unity"></ScoreEditor>
       <br>
-      <textarea v-model="reflection1" class="padding margin-left full-width textarea" placeholder="What was your role in the activity event?" rows="3"></textarea><br>
-      <textarea v-model="reflection2" class="padding margin-left full-width textarea" placeholder="Is there any benefit to community? If yes, How?" rows="3"></textarea><br>
-      <textarea v-model="reflection3" class="padding margin-left full-width textarea" placeholder="Is there any benefit to yourself?" rows="3"></textarea><br>
+      <textarea v-model="reflection1" class="padding margin-left full-width textarea" placeholder="What was your role in the activity event?" rows="2"></textarea><br>
+      <textarea v-model="reflection2" class="padding margin-left full-width textarea" placeholder="Is there any benefit to community? If yes, How?" rows="2"></textarea><br>
+      <textarea v-model="reflection3" class="padding margin-left full-width textarea" placeholder="Is there any benefit to yourself?" rows="2"></textarea><br>
       <div @click="checkInput" class="padding button is-info margin-left full-width">
         Next
       </div>
@@ -90,7 +90,7 @@ export default {
         ])
         // redirect to difference form
         if (reportRequired) {
-          this.$router.push('report')
+          this.$router.push('submitReport')
         } else {
           this.$router.push('upload')
         }
