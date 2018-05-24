@@ -84,6 +84,33 @@ export const user = {
       res.status(409).json(e)
     }
   },
+  async report (req, res) {
+    try {
+      const activity_id = req.params.id
+      const { course_id, reflections, student_id, scores, file, participants } = req.body
+
+      const student = await Users.findOne({student_id})
+
+      const newRecord = new Records({
+        course_id,
+        activity_id,
+        student_id,
+        batch_id: student.tracking_id,
+        reflections,
+        participants,
+        scores,
+        file,
+        status: {
+          approved: null
+        }
+      })
+
+      const added = await newRecord.save()
+      res.status(201).json({success: true, message: 'created', id: added._id})
+    } catch (e) {
+      res.status(409).json(e)
+    }
+  },
   async cancel (req, res) {
     try {
       const record_id = req.params.id
