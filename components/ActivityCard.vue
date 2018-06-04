@@ -3,7 +3,7 @@
     <div class="columns is-mobile">
       <div class="column is-10-desktop is-9-mobile is-size-3 word-wrap">
         <router-link :to="eventRoute" class="has-text-black">
-        {{ detail.title }}
+          {{ detail.title }}
         </router-link>
       </div>
       <div v-if="detail.unity" class="column is-2-desktop word-wrap has-text-centered">
@@ -48,16 +48,16 @@ export default {
       required: true
     }
   },
-  data() {
+  data () {
     return {
       interestedButton: 'Interested'
     }
   },
   methods: {
-    enroll() {
+    enroll () {
       this.$router.push(`${this.eventRoute}/form`)
     },
-    async pin() {
+    async pin () {
       const text1 = 'Interested'
       const text2 = 'Not interested'
       const token = this.token
@@ -76,7 +76,7 @@ export default {
         this.interestedButton = text2
       }
     },
-    async fetchState() {
+    async fetchState () {
       const text1 = 'Interested'
       const text2 = 'Not interested'
       const token = this.token
@@ -95,7 +95,7 @@ export default {
         this.interestedButton = text2
       }
     },
-    dateFormat(date) {
+    dateFormat (date) {
       return moment(date).format('DD/MMM/YY LT')
     }
   },
@@ -104,17 +104,17 @@ export default {
       signedIn: 'user/user',
       token: 'user/token'
     }),
-    eventRoute() {
+    eventRoute () {
       return `/event/${this.detail._id}`
     }
   },
-  mounted() {
+  mounted () {
     if (this.signedIn) {
       this.fetchState()
     }
   },
   watch: {
-    signedIn(value) {
+    signedIn (value) {
       if (value) {
         this.fetchState()
       }

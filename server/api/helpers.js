@@ -512,3 +512,8 @@ function checkCourseId (courseId) {
     return '955101 - LEARNING THROUGH ACTIVITIES 2'
   }
 }
+
+export function paginate (array, limit, page) {
+  --page
+  return array.slice(page * limit, (page + 1) * limit)
+}

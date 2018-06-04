@@ -25,7 +25,8 @@ const schema = new mongoose.Schema({
   createdBy: {
     user: ObjectId,
     admin: ObjectId
-  }
+  },
+  isAvailable: Boolean
 }, {
   timestamps: true
 })

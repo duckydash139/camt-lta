@@ -1,17 +1,23 @@
 import axios from 'axios'
 import qs from 'querystring'
 import jwt from 'jsonwebtoken'
+import _ from 'lodash'
 
 import {
   Activities,
   Batches,
   Criteria,
+  Interests,
   Notifications,
   Records,
   Users
 } from '../models'
 
-import { grading, generatePdf } from '../helpers'
+import { grading, generatePdf, paginate } from '../helpers'
+
+import { Types } from 'mongoose'
+
+const ObjectId = Types.ObjectId
 
 const createToken = payload => {
   const token = jwt.sign(payload, process.env.SECRET, { expiresIn: '2h' })
@@ -58,8 +64,8 @@ export const oauth = {
           username: itaccount_name,
           citizen_id,
           student_id,
-          first_name: first_name.en_US,
-          last_name: last_name.en_US,
+          first_name: `${first_name.en_US[0]}${first_name.en_US.toLowerCase().substring(1)}`,
+          last_name: `${last_name.en_US[0]}${last_name.en_US.toLowerCase().substring(1)}`,
           organization: organization.code
         })
         await newUser.save()
@@ -122,6 +128,21 @@ export const index = {
       res.json({ status: 'error', message: e })
     }
   },
+  async miniDetail (req, res) {
+    try {
+      let user = await Users.findOne({ _id: ObjectId(req.params.id) })
+      if (user.length === 0) {
+        res.status(404).json({ message: 'Not found' })
+      }
+      res.status(200).json({
+        student_id: user.student_id,
+        first_name: user.first_name,
+        last_name: user.last_name
+      })
+    } catch (e) {
+      res.json({ status: 'error', message: e })
+    }
+  },
   async search (req, res) {
     try {
       let users = await Users.find({ student_id: req.params.id })
@@ -174,22 +195,111 @@ export const index = {
       res.json({ status: 'error', message: e })
     }
   },
+  async createdList (req, res) {
+    try {
+      const userId = parseInt(req.params.id)
+      const limit = parseInt(req.query.limit) || 10
+      const page = parseInt(req.query.page)|| 1
+
+      const student = await Users.findOne({
+        student_id: userId
+      })
+
+      const result = await Activities.paginate(
+        { 'createdBy.user': ObjectId(student._id), isAvailable: true },
+        { sort: { createdAt: -1 }, limit, page }
+      )
+
+      res.status(200).json(result)
+    } catch (e) {
+      res.json({ status: 'error', message: e })
+    }
+  },
+  async interest (req, res) {
+    try {
+      const userId = parseInt(req.params.id)
+      const limit = parseInt(req.query.limit) || 10
+      const page = parseInt(req.query.page)|| 1
+
+      const aggregate = Interests.aggregate([
+        {
+          $match: {'student_id': { $eq: userId }}
+        },
+        {
+          $lookup: {
+            from: 'activities',
+            localField: 'activity_id',
+            foreignField: '_id',
+            as: 'activity_doc'
+          }
+        },
+        {
+          $replaceRoot: { newRoot: { $mergeObjects: [ { $arrayElemAt: [ '$activity_doc', 0 ] }, '$$ROOT' ] } }
+        },
+        {
+          $project: {
+            _id: '$_id',
+            createdAt: '$createdAt',
+            student_id: '$student_id',
+            activity_id: '$activity_id',
+            activity_title: '$title'
+          }
+        }
+      ])
+
+      const data = await Interests.aggregatePaginate(aggregate, { page, limit })
+      res.status(200).json({
+        docs: data.data,
+        total: data.totalCount,
+        limit,
+        'offset': 0,
+        page,
+        'pages': data.pageCount
+      })
+    } catch (e) {
+      res.json({ status: 'error', message: e })
+    }
+  },
   async history (req, res) {
     try {
       const userId = req.params.id
+      // find user's id
+      const { _id } = await Users.findOne({
+        student_id: userId
+      })
+      // find records that created by this user
+      const normalRecords = await Records.find({
+        student_id: userId,
+        // file: null
+      })
+      // find records that this user is participant
+      const isParticipant = await Records.find({
+        participants: ObjectId(_id),
+        student_id: !userId
+      })
+      const allRecords = _.sortBy([
+        ...normalRecords,
+        ...isParticipant
+      ], 'createdAt').reverse()
+
+      let totalPage = Math.floor(allRecords.length / 10)
       if (req.query.page) {
-        const result = await Records.paginate(
-          { student_id: userId },
-          { sort: { updatedAt: -1 }, limit: 10, page: req.query.page }
-        )
-        // console.log(result)
+        const result = {
+          docs: paginate(allRecords, 10, req.query.page),
+          page: parseInt(req.query.page),
+          pages: totalPage > 0 ? totalPage : 1,
+          total: totalPage > 0 ? totalPage : 1,
+          limit: 10
+        }
         res.status(200).json(result)
       } else {
-        const result = await Records.paginate(
-          { student_id: userId },
-          { sort: { updatedAt: -1 }, limit: 10 }
-        )
-        // console.log(result)
+        const result = {
+          docs: paginate(allRecords, 10, 1),
+          page: 1,
+          pages: totalPage > 0 ? totalPage : 1,
+          total: totalPage > 0 ? totalPage : 1,
+          limit: 10
+        }
         res.status(200).json(result)
       }
     } catch (e) {

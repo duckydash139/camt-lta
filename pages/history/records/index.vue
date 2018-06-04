@@ -7,12 +7,12 @@
         <div class="tabs is-toggle is-fullwidth">
           <ul>
             <li class="">
-              <router-link to="/history/activities">
+              <router-link to="activities">
                 <span>Activities</span>
               </router-link>
             </li>
             <li>
-              <router-link to="/history/interests">
+              <router-link to="interests">
                 <span>Interests</span>
               </router-link>
             </li>
