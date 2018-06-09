@@ -12,9 +12,11 @@ router.get('/users/find/:id', index.findStudent)
 router.put('/users/:id/course/', auth.user, index.setCourse)
 router.get('/users/:id/:course/score', auth.user, index.checkScore)
 router.get('/users/:id/:course/export', auth.user, index.exportHistory)
+
 router.get('/users/:id/activity/all', auth.user, index.createdList)
 router.get('/users/:id/history/all', auth.user, index.history)
 router.get('/users/:id/interest/all', auth.user, index.interest)
+
 router.get('/users/:id/notification', auth.user, index.fetchNotify)
 router.put('/users/:id/notification', auth.user, index.markAllAs)
 router.put('/users/:id/notification/:notifyId', auth.user, index.updateNotify)

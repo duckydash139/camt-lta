@@ -15,8 +15,8 @@ const app = express()
 const host = process.env.HOST
 const port = process.env.PORT
 
-app.use(urlencoded({ limit: '10mb', extended: true }))
-app.use(json())
+app.use(json({limit: '10mb'}))
+app.use(urlencoded({ limit: '10mb', extended: true, parameterLimit: 10000 }))
 app.set('port', port)
 
 // Import API Routes

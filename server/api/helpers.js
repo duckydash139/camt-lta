@@ -1,11 +1,8 @@
 import _ from 'lodash'
-import moment from 'moment'
 
 import { Criteria, Batches, Records, Users } from './models'
 
 import { Types } from 'mongoose'
-
-const pdfMakePrinter = require('pdfmake/src/printer')
 
 const ObjectId = Types.ObjectId
 
@@ -385,7 +382,6 @@ export const sheets = {
     }
   }
 }
-
 export const generatePdf = (profile, data, callback) => {
   const fontDescriptors = {
     THSarabunNew: {
