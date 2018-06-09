@@ -27,6 +27,9 @@
         </div>
         <div id="editor" style="height: 400px;">
         </div>
+        <div class="has-text-danger is-size-7">
+           Ps. The image size limit is 10 MB. And only JPEG/PNG are supported.
+        </div>
       </div>
     </div>
     <div class="column is-paddingless has-left-border is-4">
@@ -53,7 +56,9 @@
           </div>
         </div>
         <br>
-        <textarea class="padding margin-left full-width textarea" disabled rows="3">{{ storedDes }}</textarea>
+        <div v-for="reflex of storedDes">
+          {{ reflex }}
+        </div>
         <br>
         <button @click="goBack" class="padding button margin-left full-width">Back</button>
         <button @click="submitData" class="padding button is-info margin-left full-width" :class="{'is-loading': loading}" :disabled="!hasImage">Earn points</button>
@@ -165,7 +170,7 @@ export default {
     ...mapGetters({
       signedIn: 'user/user',
       storedScores: 'event/scores',
-      storedDes: 'event/description'
+      storedDes: 'event/reflections'
     }),
     eventRoute () {
       return `/event/${this.detail._id}`

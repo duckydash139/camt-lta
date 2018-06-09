@@ -55,6 +55,7 @@
     "vue-style-loader": "^4.0.2",
     "vue-template-compiler": "^2.5.16",
     "vuetable-2": "^1.7.0",
+    "vuetify": "^1.0.19",
     "xlsx-style": "^0.8.13"
   },
   "devDependencies": {

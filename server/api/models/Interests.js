@@ -1,9 +1,12 @@
 import mongoose from 'mongoose'
 import paginate from 'mongoose-paginate'
+import aggregatePaginate from 'mongoose-aggregate-paginate'
+
+const ObjectId = mongoose.Schema.Types.ObjectId
 
 const schema = new mongoose.Schema({
   activity_id: {
-    type: String,
+    type: ObjectId,
     require: true
   },
   student_id: {
@@ -16,6 +19,7 @@ const schema = new mongoose.Schema({
 })
 
 schema.plugin(paginate)
+schema.plugin(aggregatePaginate)
 const Interest = mongoose.model('Interests', schema)
 
 export default Interest

@@ -1,23 +1,23 @@
 <template>
-<div id="">
-  <form @submit.prevent="search">
-    <div class="field has-addons">
-      <div class="control">
-        <input ref="query" v-model="query" class="input" type="text" placeholder="Search...">
+  <div id="">
+    <form @submit.prevent="search">
+      <div class="field has-addons">
+        <div class="control">
+          <input ref="query" v-model="query" class="input" type="text" placeholder="Search...">
+        </div>
+        <div class="control">
+          <button class="button">
+            Go
+          </button>
+        </div>
       </div>
-      <div class="control">
-        <button class="button">
-          Go
-        </button>
-      </div>
-    </div>
-  </form>
-</div>
+    </form>
+  </div>
 </template>
 
 <script>
 export default {
-  data() {
+  data () {
     return {
       query: ''
     }
@@ -35,22 +35,25 @@ export default {
 .field {
   padding-left: 10vw;
 }
-input, input:focus {
+input,
+input:focus {
   width: 25vw;
-  background: #EDEDED;
-  box-shadow: inset 0 0 0 0px #EDEDED;
+  background: #ededed;
+  box-shadow: inset 0 0 0 0px #ededed;
   border: 0;
   border-radius: 11px;
 }
 button {
   width: 5vw;
   border-radius: 11px;
-  border: solid 1px #EDEDED;
+  border: solid 1px #ededed;
 }
-.button:hover, .button:active, .button:focus {
+.button:hover,
+.button:active,
+.button:focus {
   outline: 0;
   box-shadow: none;
-  border: solid 1px #EDEDED;
+  border: solid 1px #ededed;
 }
 @media (max-width: 768px) {
   .field {
@@ -58,8 +61,8 @@ button {
   }
   input {
     width: 50vw;
-    background: #EDEDED;
-    box-shadow: inset 0 0 0 0px #EDEDED;
+    background: #ededed;
+    box-shadow: inset 0 0 0 0px #ededed;
     border: 0;
     border-radius: 11px;
   }

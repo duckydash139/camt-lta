@@ -12,8 +12,9 @@ router.post('/admin/account/permission', auth.admin, admin.permission)
 router.post('/admin/account/status', auth.admin, admin.status)
 
 /**
-* Activity section
-**/
+ * Activity section
+ **/
+router.get('/admin/activity/all', activity.all)
 router.put('/admin/activity/add', auth.admin, activity.add)
 router.get('/admin/activity/pending', auth.admin, activity.pending)
 router.get('/admin/activity/approved', auth.admin, activity.approved)
@@ -22,8 +23,8 @@ router.get('/admin/activity/:id', auth.admin, activity.viewById)
 router.post('/admin/activity/:id', auth.admin, activity.action)
 router.get('/admin/activity/:id/check', auth.admin, activity.isApproved)
 /**
-* Course section
-**/
+ * Course section
+ **/
 router.post('/admin/course/:id/create', auth.admin, course.newBatch)
 router.post('/admin/course/:id/checkout', course.checkout)
 router.get('/admin/course/:id/check', auth.admin, course.checkBatch)
@@ -35,10 +36,11 @@ router.get('/admin/course/:id/history', auth.admin, course.batch)
 router.get('/admin/course/:id/history/:batch', auth.admin, course.batchById)
 router.get('/admin/course/:id/history/:batch/export', auth.admin, course.exportData)
 /**
-* Student section
-**/
+ * Student section
+ **/
 router.get('/admin/student/all', auth.admin, student.all)
 router.get('/admin/student/:id', auth.admin, student.byId)
+router.get('/admin/student/:id/clear', auth.admin, student.clearTracking)
 router.get('/admin/student/:id/:course/score', auth.admin, student.checkScore)
 router.get('/admin/student/:id/history/all', auth.admin, student.history)
 router.get('/admin/student/:id/history/:eventId', auth.admin, student.historyById)

@@ -12,7 +12,8 @@ const schema = new mongoose.Schema({
       title: String,
       max: Number,
       color: String,
-      formula: String
+      formula: String,
+      report: Boolean
     }
   ]
 })

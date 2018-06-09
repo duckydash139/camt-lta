@@ -1,55 +1,51 @@
 <template>
-<div>
-  <div class="card columns extend-card">
-    <div class="column is-8">
-      <div class="columns is-mobile">
-        <div class="column is-10-desktop is-9-mobile is-size-3 word-wrap">
-          <router-link :to="eventRoute" class="has-text-black">
-            {{ detail.title }}
-          </router-link>
+  <div>
+    <div class="card columns extend-card">
+      <div class="column is-8">
+        <div class="columns is-mobile">
+          <div class="column is-10-desktop is-9-mobile is-size-3 word-wrap">
+            <router-link :to="eventRoute" class="has-text-black">
+              {{ detail.title }}
+            </router-link>
+          </div>
+          <div v-if="detail.unity" class="column is-2-desktop word-wrap has-text-centered">
+            <span class="tag is-light is-medium has-text-info">Unity</span>
+          </div>
         </div>
-        <div v-if="detail.unity" class="column is-2-desktop word-wrap has-text-centered">
-          <span class="tag is-light is-medium has-text-info">Unity</span>
+        <div class="petit">
+          <div class="columns is-mobile">
+            <div class="column">
+              <p class="has-text-grey">Date</p>
+              <p class="normal-text">{{ dateFormat(detail.startAt) }} - {{ dateFormat(detail.endAt) }}</p>
+            </div>
+            <div class="column">
+              <p class="has-text-grey">Location</p>
+              <p class="normal-text">{{ detail.location }}</p>
+            </div>
+          </div>
         </div>
-      </div>
-      <div class="petit">
         <div class="columns is-mobile">
           <div class="column">
-            <p class="has-text-grey">Date</p>
-            <p class="normal-text">{{ eventDate }}</p>
-          </div>
-          <div class="column">
-            <p class="has-text-grey">Time</p>
-            <p class="normal-text">{{ eventTime }}</p>
-          </div>
-          <div class="column">
-            <p class="has-text-grey">Location</p>
-            <p class="normal-text">{{ detail.location }}</p>
+            <p class="petit has-text-grey">Description</p>
+            <p class="normal-text full-width-mobile">{{ detail.description }}</p>
           </div>
         </div>
       </div>
-      <div class="columns is-mobile">
-        <div class="column">
-          <p class="petit has-text-grey">Description</p>
-          <p class="normal-text full-width-mobile">{{ detail.description }}</p>
+      <div class="column is-paddingless has-left-border is-4">
+        <ScoreEditor v-model="inputList" :dropdown="dropdowns" :unity="detail.unity"></ScoreEditor>
+        <br>
+        <textarea v-model="reflection1" class="padding margin-left full-width textarea" placeholder="What was your role in the activity event?" rows="2"></textarea><br>
+        <textarea v-model="reflection2" class="padding margin-left full-width textarea" placeholder="Is there any benefit to community? If yes, How?" rows="2"></textarea><br>
+        <textarea v-model="reflection3" class="padding margin-left full-width textarea" placeholder="Is there any benefit to yourself?" rows="2"></textarea><br>
+        <div @click="checkInput" class="padding button is-info margin-left full-width">
+          Next
         </div>
-      </div>
-    </div>
-    <div class="column is-paddingless has-left-border is-4">
-      <ScoreEditor v-model="inputList" :dropdown="dropdowns" :unity="detail.unity"></ScoreEditor>
-      <br>
-      <textarea v-model="description" class="padding margin-left full-width textarea" placeholder="Write something here.." rows="3"></textarea><br>
-      <div @click="checkInput" class="padding button is-info margin-left full-width">
-        Next
       </div>
     </div>
   </div>
-</div>
 </template>
 <script>
-import {
-  mapGetters
-} from 'vuex'
+import { mapGetters } from 'vuex'
 import _ from 'lodash'
 import axios from 'axios'
 import moment from 'moment'
@@ -68,7 +64,9 @@ export default {
     return {
       dropdowns: [],
       inputList: [],
-      description: '',
+      reflection1: '',
+      reflection2: '',
+      reflection3: '',
       addButton: false,
       nextButton: false
     }
@@ -76,13 +74,32 @@ export default {
   methods: {
     checkInput () {
       if (!_.isEmpty(this.inputList)) {
+        let reportRequired = false
+        // is it require report?
+        for (const score of this.inputList) {
+          if (score.report = true) {
+            reportRequired = true
+          }
+        }
         this.$store.commit('event/setScores', this.inputList)
         this.$store.commit('event/setEventId', this.detail._id)
-        this.$store.commit('event/setDescription', this.description)
-        this.$router.push('upload')
+        this.$store.commit('event/setReflections', [
+          this.reflection1,
+          this.reflection2,
+          this.reflection3
+        ])
+        // redirect to difference form
+        if (reportRequired) {
+          this.$router.push('submitReport')
+        } else {
+          this.$router.push('upload')
+        }
       } else {
         this.$toast.open('Form is empty!, please click "ADD" to fill the form')
       }
+    },
+    dateFormat (date) {
+      return moment(date).format('DD/MMM/YY LT')
     }
   },
   computed: {
@@ -90,29 +107,23 @@ export default {
       signedIn: 'user/user',
       storedScores: 'event/scores'
     }),
-    eventDate () {
-      const date = new Date(this.detail.date)
-      return moment(date).format('DD MMM YY')
-    },
-    eventTime () {
-      const date = new Date(this.detail.date)
-      return moment(date).format('LT')
-    },
     eventRoute () {
       return `/event/${this.detail._id}`
     }
   },
-  mounted() {
+  mounted () {
     if (this.signedIn) {
-      axios.get(`/api/criteria/${this.signedIn.trackingId}`)
-      .then(({ data }) => this.dropdowns = data.structure)
+      axios
+        .get(`/api/criteria/${this.signedIn.trackingId}`)
+        .then(({ data }) => (this.dropdowns = data.structure))
     }
   },
   watch: {
     signedIn (value) {
       if (value.trackingId !== null) {
-        axios.get(`/api/criteria/${value.trackingId}`)
-        .then(({ data }) => this.dropdowns = data.structure)
+        axios
+          .get(`/api/criteria/${value.trackingId}`)
+          .then(({ data }) => (this.dropdowns = data.structure))
       }
     }
   }

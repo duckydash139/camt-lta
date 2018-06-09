@@ -4,11 +4,11 @@
     <div class="column">
       <h3 class="has-text-weight-bold">
           CREATE NEW ACTIVITY
-        </h3>
+      </h3>
     </div>
   </div>
   <div class="columns content">
-    <div class="column card">
+      <div class="column card">
       <form @submit.prevent="addActivity">
         <div class="card-content">
           <div class="columns">
@@ -18,7 +18,10 @@
           </div>
           <div class="columns">
             <div class="column">
-              <datetime input-class="input" placeholder="Date" v-model="date" type="datetime" required></datetime>
+              <datetime input-class="input" placeholder="Start at" v-model="startAt" type="datetime" required></datetime>
+            </div>
+            <div class="column">
+              <datetime input-class="input" placeholder="End at" v-model="endAt" :min-date="startAt" type="datetime" required></datetime>
             </div>
           </div>
           <div class="columns">
@@ -53,33 +56,39 @@ import qs from 'querystring'
 
 export default {
   layout: 'admin',
-  data () {
+  data() {
     return {
       title: '',
-      date: '',
+      startAt: '',
+      endAt: '',
       location: '',
       description: '',
       unity: false
     }
   },
   methods: {
-    async addActivity () {
+    async addActivity() {
       const loading = this.$loading.open()
       const token = this.$store.state.admin.token
       const payload = {
         title: this.title,
-        date: this.date,
+        startAt: this.startAt,
+        endAt: this.endAt,
         location: this.location,
         description: this.description,
         unity: this.unity,
         admin: this.$store.state.admin.id
       }
 
-      const { data } = await axios.put(`/api/admin/activity/add`, qs.stringify(payload), {headers: {token}})
+      const { data } = await axios.put(
+        `/api/admin/activity/add`,
+        qs.stringify(payload),
+        { headers: { token } }
+      )
 
       if (data.success && data.id) {
         loading.close()
-        this.$router.push(`history/${data.id}`)
+        this.$router.push(data.id)
       }
     }
   }

@@ -5,42 +5,42 @@
         <h3 class="has-text-weight-bold">STUDENT LIST</h3>
       </div>
     </div>
-    <div class="columns content">
-      <div class="column">
-        <table class="table">
-          <thead>
-            <tr>
-              <th class="has-text-centered">Student ID</th>
-              <th class="has-text-centered">Name</th>
-              <th class="has-text-centered">Tracking</th>
-              <th class="has-text-centered">Action</th>
-            </tr>
-          </thead>
-          <tbody>
-            <tr v-for="student in students.docs" :key="student.key">
-              <td>{{ student.student_id }}</td>
-              <td>{{ student.first_name }} {{ student.last_name }}</td>
-              <td><span v-if="student.tracking === 0"></span><span v-else>{{ student.tracking }}</span></td>
-              <td><a @click="viewProfile(student.student_id)">View</a></td>
-            </tr>
-          </tbody>
-        </table>
-        <b-pagination v-if="students.pages !== 1" @change="val => page(val)" :total="students.total" :current.sync="current" order="is-centered" :per-page="students.limit">
-        </b-pagination>
+    <div class="columns">
+      <div class="column padding-content">
+        <DataTable :headers="headers" :data="students" :searchable="true" :searchKeys="keys">
+            <template slot-scope="props">
+              <td>{{ props.item.student_id }}</td>
+              <td>{{ props.item.first_name }} {{ props.item.last_name }}</td>
+              <td><span v-if="props.item.tracking === 0"></span><span v-else>{{ props.item.tracking }}</span></td>
+              <td><a @click="viewProfile(props.item.student_id)">View</a></td>
+            </template>
+        </DataTable>
       </div>
     </div>
   </div>
 </template>
 <script>
+import DataTable from '~/components/DataTable'
 import axios from 'axios'
 export default {
   layout: 'admin',
+  components: {
+    DataTable
+  },
   data () {
     return {
-      students: {
-        docs: null
-      },
-      current: 1
+      headers: [
+        'Student ID',
+        'Name',
+        'Tracking',
+        ''
+      ],
+      keys: [
+        'student_id',
+        'first_name',
+        'last_name'
+      ],
+      students: []
     }
   },
   methods: {
@@ -51,13 +51,6 @@ export default {
     },
     viewProfile (id) {
       return this.$router.push(`/admin/students/${id}`)
-    },
-    async page (nextPage) {
-      let token = this.$store.state.admin.token
-      const loading = this.$loading.open()
-      const { data } = await axios.get(`/api/admin/student/all?page=${nextPage}`, {headers: {token}})
-      this.students = data
-      loading.close()
     }
   },
   mounted () {
@@ -68,8 +61,14 @@ export default {
 <style scoped>
 .content {
   margin: 0 1vw 0 1vw;
+  /*border: solid 1px red;*/
 }
-td {
+
+th, td {
   text-align: center;
+}
+
+.padding-content {
+  padding: 0 2vw 0 2vw;
 }
 </style>

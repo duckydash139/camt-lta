@@ -22,7 +22,10 @@ const schema = new mongoose.Schema({
     type: ObjectId,
     require: true
   },
-  description: String,
+  reflections: Array,
+  participants: {
+    type: [ObjectId]
+  },
   scores: {
     type: [{
       _id: false,
@@ -32,6 +35,7 @@ const schema = new mongoose.Schema({
     }]
   },
   picture: String,
+  file: String,
   status: {
     _id: false,
     approved: Boolean,

@@ -3,7 +3,7 @@
     <div class="columns is-mobile">
       <div class="column is-10-desktop is-9-mobile is-size-3 word-wrap">
         <router-link :to="eventRoute" class="has-text-black">
-        {{ detail.title }}
+          {{ detail.title }}
         </router-link>
       </div>
       <div v-if="detail.unity" class="column is-2-desktop word-wrap has-text-centered">
@@ -14,11 +14,7 @@
       <div class="columns is-mobile">
         <div class="column">
           <p class="has-text-grey">Date</p>
-          <p class="normal-text">{{ eventDate }}</p>
-        </div>
-        <div class="column">
-          <p class="has-text-grey">Time</p>
-          <p class="normal-text">{{ eventTime }}</p>
+          <p class="normal-text">{{ dateFormat(detail.startAt) }} - {{ dateFormat(detail.endAt) }}</p>
         </div>
         <div class="column">
           <p class="has-text-grey">Location</p>
@@ -68,7 +64,11 @@ export default {
       const payload = {
         student_id: this.signedIn.studentId
       }
-      let { data } = await axios.post(`/api/event/${this.detail._id}/interest`, payload, {headers: {token}})
+      let { data } = await axios.post(
+        `/api/event/${this.detail._id}/interest`,
+        payload,
+        { headers: { token } }
+      )
       const { success } = data
       if (success === true) {
         this.interestedButton = text1
@@ -83,13 +83,20 @@ export default {
       const payload = {
         student_id: this.signedIn.studentId
       }
-      let { data } = await axios.post(`/api/event/${this.detail._id}/check`, payload, {headers: {token}})
+      let { data } = await axios.post(
+        `/api/event/${this.detail._id}/check`,
+        payload,
+        { headers: { token } }
+      )
       const { success } = data
       if (success === false) {
         this.interestedButton = text1
       } else {
         this.interestedButton = text2
       }
+    },
+    dateFormat (date) {
+      return moment(date).format('DD/MMM/YY LT')
     }
   },
   computed: {
@@ -97,14 +104,6 @@ export default {
       signedIn: 'user/user',
       token: 'user/token'
     }),
-    eventDate () {
-      const date = new Date(this.detail.date)
-      return moment(date).format('DD MMM YY')
-    },
-    eventTime () {
-      const date = new Date(this.detail.date)
-      return moment(date).format('LT')
-    },
     eventRoute () {
       return `/event/${this.detail._id}`
     }

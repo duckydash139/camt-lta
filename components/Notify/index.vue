@@ -47,7 +47,6 @@ export default {
       }), {headers: { token }})
       this.markAll = !this.markAll
       this.notifications = data.docs
-      console.log(data.docs)
     }
   },
   mounted () {

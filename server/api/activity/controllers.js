@@ -5,6 +5,11 @@ import {
   Users
 } from '../models'
 
+import { grading } from '../helpers'
+import { Types } from 'mongoose'
+
+const ObjectId = Types.ObjectId
+
 function escapeRegex (text) {
   return text.replace(/[-[\]{}()*+?.,\\^$|#\s]/g, "\\$&")
 }
@@ -12,10 +17,9 @@ function escapeRegex (text) {
 export const user = {
   async get (req, res) {
     if (req.query.keyword) {
-      console.log(req.query.keyword)
       try {
         const regex = new RegExp(escapeRegex(req.query.keyword), 'gi')
-        const normalFuzzySearch = { $or: [ { 'title': regex }, { 'location': regex }, { 'description': regex } ] }
+        const normalFuzzySearch = { isAvailable: true, $or: [ { 'title': regex }, { 'location': regex }, { 'description': regex } ] }
         const foundActivities = await Activities.find(normalFuzzySearch)
         // console.log(foundActivities)
         res.status(201).json(foundActivities)
@@ -24,7 +28,7 @@ export const user = {
       }
     } else if (req.query.page) {
       try {
-        const events = await Activities.paginate({}, { sort: { date: -1 }, limit: 10, page: req.query.page })
+        const events = await Activities.paginate({isAvailable: true}, { sort: { startAt: -1 }, limit: 10, page: req.query.page })
         // console.log(events)
         res.status(201).json(events)
       } catch (e) {
@@ -32,7 +36,7 @@ export const user = {
       }
     } else {
       try {
-        const events = await Activities.paginate({}, { sort: { date: -1 }, limit: 10 })
+        const events = await Activities.paginate({isAvailable: true}, { sort: { startAt: -1 }, limit: 10 })
         // console.log(events)
         res.status(201).json(events)
       } catch (e) {
@@ -42,38 +46,118 @@ export const user = {
   },
   async add (req, res) {
     try {
-      const {title, date, location, description, user, admin} = req.body
-      console.log(req.body)
+      const { title, startAt, endAt, location, description, user, admin } = req.body
 
-      const newActivity = new Activities({title, date, location, description, createdBy: {user, admin}})
+      const newActivity = new Activities({title, startAt, endAt, location, description, isAvailable: true, createdBy: {user, admin}})
       const added = await newActivity.save()
       res.status(201).json({success: true, message: 'created', id: added._id})
     } catch (e) {
       res.status(409).json({success: false, message: 'Oops! something went wrong'})
     }
   },
+  async edit (req, res) {
+    try {
+      const id = req.params.id
+      const { title, startAt, endAt, location, description } = req.body
+
+      await Activities.findOneAndUpdate(
+        { _id: ObjectId(id) },
+        { title, startAt, endAt, location, description }
+      )
+
+      res.status(200).json({success: true, message: 'updated!'})
+    } catch (e) {
+      res.status(409).json({success: false, message: e})
+    }
+  },
+  async delete (req, res) {
+    try {
+      const id = req.params.id
+
+      await Activities.findOneAndUpdate(
+        { _id: ObjectId(id) },
+        { isAvailable: false }
+      )
+
+      res.status(200).json({success: true, message: 'deleted!'})
+    } catch (e) {
+      res.status(409).json({success: false, message: e})
+    }
+  },
+  async checkActivity (req, res) {
+    try {
+      const id = req.params.id
+
+      const search = await Records.find({
+        activity_id: ObjectId(id)
+      })
+
+      if (search.length > 0) {
+        res.status(200).json({
+          deletable: false
+        })
+      } else {
+        res.status(200).json({
+          deletable: true
+        })
+      }
+    } catch (e) {
+      res.status(409).json({success: false, message: e})
+    }
+  },
   async search (req, res) {
     const id = req.params.id
-    const activity = await Activities.findOne({_id: id})
-    const { title, date, location, description, unity } = activity
-    const payload = { _id: id, title, date, location, description, unity }
+    const activity = await Activities.findOne({_id: id, isAvailable: true})
+    const { title, startAt, endAt, location, description, unity } = activity
+    const payload = { _id: id, title, startAt, endAt, location, description, unity }
     res.status(200).json(payload)
   },
   async submit (req, res) {
     try {
       const activity_id = req.params.id
-      const { course_id, description, student_id, scores, photo } = req.body
+      const { course_id, reflections, student_id, scores, photo } = req.body
 
       const student = await Users.findOne({student_id})
+
+      const newScore = await grading.save(scores, student.tracking_id)
 
       const newRecord = new Records({
         course_id,
         activity_id,
         student_id,
         batch_id: student.tracking_id,
-        description,
-        scores,
+        reflections,
+        scores: newScore,
         picture: photo,
+        status: {
+          approved: null
+        }
+      })
+
+      const added = await newRecord.save()
+      res.status(201).json({success: true, message: 'created', id: added._id})
+    } catch (e) {
+      res.status(409).json(e)
+    }
+  },
+  async report (req, res) {
+    try {
+      const activity_id = req.params.id
+      const { course_id, reflections, student_id, scores, file, participants } = req.body
+
+      const student = await Users.findOne({student_id})
+
+      const newScore = await grading.save(scores, student.tracking_id)
+
+      const newRecord = new Records({
+        course_id,
+        activity_id,
+        student_id,
+        batch_id: student.tracking_id,
+        reflections,
+        participants,
+        scores: newScore,
+        file,
         status: {
           approved: null
         }
