@@ -7,7 +7,8 @@ module.exports = {
     meta: [
       {
         charset: 'utf-8'
-      }, {
+      },
+      {
         name: 'viewport',
         content: 'width=device-width, initial-scale=1'
       }
@@ -29,7 +30,7 @@ module.exports = {
   ** Add axios globally
   */
   build: {
-    extend (config) {
+    extend(config) {
       config.resolve.alias['vue'] = 'vue/dist/vue.common'
     },
     vendor: ['axios', 'tui-image-editor']
@@ -42,8 +43,11 @@ module.exports = {
     //   }
     // }
   },
-  plugins: ['~plugins/buefy', '~plugins/vue-datetime', '~plugins/async-computed', '~plugins/directives/drag'],
-  modules: [
-    '@nuxtjs/font-awesome'
-  ]
+  plugins: [
+    '~plugins/buefy',
+    '~plugins/vue-datetime',
+    '~plugins/async-computed',
+    '~plugins/directives/drag'
+  ],
+  modules: ['@nuxtjs/font-awesome']
 }

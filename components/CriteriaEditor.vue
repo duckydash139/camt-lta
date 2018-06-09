@@ -8,31 +8,34 @@
         </div>
       </div>
       <div class="columns">
-        <div class="column">
+        <div class="column is-2">
           <b>Title</b>
         </div>
-        <div class="column">
+        <div class="column is-2">
           <b>Max score</b>
         </div>
-        <div class="column">
+        <div class="column is-2">
           <b>Formula</b>
         </div>
-        <div class="column">
+        <div class="column is-2">
           <b>Value</b>
         </div>
-        <div class="column">
+        <div class="column is-2">
+          <b>Report</b>
+        </div>
+        <div class="column is-1">
           <b>Color</b>
         </div>
         <div class="column is-1"></div>
       </div>
       <div class="columns" v-for="(item, index) in list" :key="item.key">
-        <div class="column">
+        <div class="column is-2">
           <input v-model="item.title" placeholder="title" type="text" class="input">
         </div>
-        <div class="column">
+        <div class="column is-2">
           <input v-model="item.max" placeholder="max" type="number" min="0" class="input">
         </div>
-        <div class="column">
+        <div class="column is-2">
           <select v-model="item.formula" class="input" name="">
             <option value="unity">Count participants</option>
             <option value="depends on admin">Depends on admin</option>
@@ -41,10 +44,13 @@
             <option value="normal">Normal</option>
           </select>
         </div>
-        <div class="column">
+        <div class="column is-2">
           <input v-model="item.point" :disabled="(item.formula === 'normal') || (item.formula === 'unity') || (item.formula === 'depends on admin') ? true : false" placeholder="0" type="number" min="0" class="input">
         </div>
-        <div class="column">
+        <div class="column is-2">
+          <b-checkbox v-model="item.report">Report</b-checkbox>
+        </div>
+        <div class="column is-1">
           <input v-model="item.color" type="color" class="input">
         </div>
         <div @click="deleteBtn(index)" class="column is-1 has-text-centered">
@@ -100,7 +106,8 @@ export default {
           title: item.title,
           max: item.max,
           formula,
-          color: item.color
+          color: item.color,
+          report: item.report
         })
       })
 
@@ -133,7 +140,8 @@ export default {
           max: item.max,
           formula,
           point,
-          color: item.color
+          color: item.color,
+          report: item.report
         })
       })
 

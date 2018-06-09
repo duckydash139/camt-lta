@@ -9,6 +9,9 @@
           Tracking: <b v-if="student.tracking === 0"></b><b v-else>{{ student.tracking }}</b><br>
         </div>
       </div>
+      <div class="column is-2 has-text-right">
+        <button @click="clearTracking" class="button is-info">Clear Tracking</button>
+      </div>
     </div>
     <div class="columns padding-content">
       <div class="column">
@@ -246,6 +249,17 @@ export default {
     },
     dateFormat (time) {
       return moment(time).format('DD/MMM/YY LT')
+    },
+    async clearTracking () {
+      const token = this.$store.state.admin.token
+      const studentId = this.$route.params.id
+      const { data } = await axios.get(`/api/admin/student/${studentId}/clear`, {headers: {token}})
+
+      if (data.success) {
+        this.student.tracking = 0
+      }
+
+      this.$toast.open('Updated!')
     }
   },
   mounted () {

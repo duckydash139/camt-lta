@@ -19,17 +19,17 @@ import { grading, sheets } from '../helpers'
 
 const ObjectId = Types.ObjectId
 
-const createToken = (payload) => {
-  const token = jwt.sign(payload, process.env.SECRET, {expiresIn: '24h'})
+const createToken = payload => {
+  const token = jwt.sign(payload, process.env.SECRET, { expiresIn: '24h' })
   return token
 }
 /**
-* Admin section
-**/
+ * Admin section
+ **/
 export const admin = {
-  async signup (req, res, next) {
+  async signup(req, res, next) {
     try {
-      const {username, password} = req.body
+      const { username, password } = req.body
 
       const newAccount = new Accounts({
         username,
@@ -39,18 +39,20 @@ export const admin = {
       })
 
       await newAccount.save()
-      res.status(201).json({success: true, message: 'created'})
+      res.status(201).json({ success: true, message: 'created' })
     } catch (e) {
-      res.status(409).json({success: false, message: e})
+      res.status(409).json({ success: false, message: e })
     }
   },
-  async signin (req, res, next) {
+  async signin(req, res, next) {
     try {
-      const {username, password} = req.body
+      const { username, password } = req.body
       if (!username || !password) {
-        res.status(401).json({success: false, message: 'invalid username or password'})
+        res
+          .status(401)
+          .json({ success: false, message: 'invalid username or password' })
       }
-      const account = await Accounts.findOne({username})
+      const account = await Accounts.findOne({ username })
       const hash = account.password
       const matched = await bcrypt.compare(password, hash)
       // setup payload to create Token
@@ -62,18 +64,28 @@ export const admin = {
       // isMatched
       if (matched) {
         if (account.is_active) {
-          res.status(200).json({success: true, message: 'signed in', token: createToken(payload)})
+          res.status(200).json({
+            success: true,
+            message: 'signed in',
+            token: createToken(payload)
+          })
         } else {
-          res.status(401).json({success: false, message: 'this username is deactivated'})
+          res
+            .status(401)
+            .json({ success: false, message: 'this username is deactivated' })
         }
       } else {
-        res.status(401).json({success: false, message: 'invalid username or password'})
+        res
+          .status(401)
+          .json({ success: false, message: 'invalid username or password' })
       }
     } catch (e) {
-      res.status(401).json({success: false, message: 'invalid username or password'})
+      res
+        .status(401)
+        .json({ success: false, message: 'invalid username or password' })
     }
   },
-  async list (req, res, next) {
+  async list(req, res, next) {
     try {
       let buffer = []
       const result = await Accounts.find()
@@ -86,18 +98,25 @@ export const admin = {
         })
       })
 
-      res.status(200).json({success: true, data: buffer})
+      res.status(200).json({ success: true, data: buffer })
     } catch (e) {
-      res.status(409).json({success: false, message: e})
+      res.status(409).json({ success: false, message: e })
     }
   },
-  async permission (req, res, next) {
+  async permission(req, res, next) {
     try {
-      const {username} = req.body
+      const { username } = req.body
 
-      const user = await Accounts.findOne({username})
+      const user = await Accounts.findOne({ username })
 
-      const result = await Accounts.findOneAndUpdate({username}, {is_root: !user.is_root})
+      const result = await Accounts.findOneAndUpdate(
+        {
+          username
+        },
+        {
+          is_root: !user.is_root
+        }
+      )
 
       res.status(200).json({
         username: result.username,
@@ -105,16 +124,23 @@ export const admin = {
         is_admin: result.is_root
       })
     } catch (e) {
-      res.status(409).json({success: false, message: e})
+      res.status(409).json({ success: false, message: e })
     }
   },
-  async status (req, res, next) {
+  async status(req, res, next) {
     try {
-      const {username} = req.body
+      const { username } = req.body
 
-      const user = await Accounts.findOne({username})
+      const user = await Accounts.findOne({ username })
 
-      const result = await Accounts.findOneAndUpdate({username}, {is_active: !user.is_active})
+      const result = await Accounts.findOneAndUpdate(
+        {
+          username
+        },
+        {
+          is_active: !user.is_active
+        }
+      )
 
       res.status(200).json({
         username: result.username,
@@ -122,34 +148,47 @@ export const admin = {
         is_admin: result.is_root
       })
     } catch (e) {
-      res.status(409).json({success: false, message: e})
+      res.status(409).json({ success: false, message: e })
     }
   }
 }
 /**
-* Student section
-**/
+ * Student section
+ **/
 export const student = {
-  async all (req, res, next) {
+  async all(req, res, next) {
     try {
       const limit = Number(req.query.limit) || 20
       const page = Number(req.query.page) || 1
 
-      const data = await Users.paginate({}, { sort: { 'student_id': -1}, limit, page })
+      const data = await Users.find({}).sort({ student_id: -1 })
       res.status(200).json(data)
     } catch (e) {
-      res.status(409).json({success: false, message: e})
+      res.status(409).json({ success: false, message: e })
     }
   },
-  async byId (req, res, next) {
+  async byId(req, res, next) {
     try {
-      const data = await Users.findOne({'student_id': req.params.id})
+      const data = await Users.findOne({ student_id: req.params.id })
       res.status(200).json(data)
     } catch (e) {
-      res.status(409).json({success: false, message: e})
+      res.status(409).json({ success: false, message: e })
     }
   },
-  async history (req, res, next) {
+  async clearTracking(req, res, next) {
+    try {
+      await Users.findOneAndUpdate(
+        {
+          student_id: req.params.id
+        },
+        { tracking: 0 }
+      )
+      res.status(200).json({ success: true, message: 'updated!' })
+    } catch (e) {
+      res.status(409).json({ success: false, message: e })
+    }
+  },
+  async history(req, res, next) {
     try {
       const limit = Number(req.query.limit) || 10
       const page = Number(req.query.page) || 1
@@ -157,7 +196,10 @@ export const student = {
 
       const aggregate = Records.aggregate([
         {
-          $match: {'student_id': studentId, 'status.approved': true}
+          $match: {
+            student_id: studentId,
+            'status.approved': true
+          }
         },
         {
           $lookup: {
@@ -168,10 +210,21 @@ export const student = {
           }
         },
         {
-          $replaceRoot: { newRoot: { $mergeObjects: [ { $arrayElemAt: [ '$activity_doc', 0 ] }, '$$ROOT' ] } }
+          $replaceRoot: {
+            newRoot: {
+              $mergeObjects: [
+                {
+                  $arrayElemAt: ['$activity_doc', 0]
+                },
+                '$$ROOT'
+              ]
+            }
+          }
         },
         {
-          $project: { activity_doc: 0 }
+          $project: {
+            activity_doc: 0
+          }
         },
         {
           $project: {
@@ -195,18 +248,18 @@ export const student = {
         pages: data.pageCount
       })
     } catch (e) {
-      res.status(409).json({success: false, message: e})
+      res.status(409).json({ success: false, message: e })
     }
   },
-  async historyById (req, res, next) {
+  async historyById(req, res, next) {
     try {
-      const data = await Records.findOne({'_id': req.params.eventId})
+      const data = await Records.findOne({ _id: req.params.eventId })
       res.status(200).json(data)
     } catch (e) {
-      res.status(409).json({success: false, message: e})
+      res.status(409).json({ success: false, message: e })
     }
   },
-  async checkScore (req, res, next) {
+  async checkScore(req, res, next) {
     try {
       let result = []
       let isCheckedOut = false
@@ -217,7 +270,7 @@ export const student = {
       const studentId = Number(req.params.id)
       const courseId = req.params.course
 
-      const student = await Users.findOne({'student_id': studentId})
+      const student = await Users.findOne({ student_id: studentId })
 
       for (let item of student.history) {
         if (item.course_id === courseId) {
@@ -236,33 +289,67 @@ export const student = {
 
       res.status(200).json(payload)
     } catch (e) {
-      res.status(409).json({status: 'error', message: e})
+      res.status(409).json({ status: 'error', message: e })
     }
   }
 }
 /**
-* Activity section
-**/
+ * Record section
+ **/
 export const activity = {
-  async add (req, res) {
+  async all(req, res) {
     try {
-      const { title, startAt, endAt, location, description, unity, admin } = req.body
+      const result = await Activities.find({ isAvailable: true }).sort({ startAt: -1 })
+      res.status(200).json(result)
+    } catch (e) {
+      res
+        .status(409)
+        .json({ success: false, message: 'Oops! something went wrong' })
+    }
+  },
+  async add(req, res) {
+    try {
+      const {
+        title,
+        startAt,
+        endAt,
+        location,
+        description,
+        unity,
+        admin
+      } = req.body
 
-      const newActivity = new Activities({title, startAt, endAt, location, description, unity, createdBy: {admin}})
+      const newActivity = new Activities({
+        title,
+        startAt,
+        endAt,
+        location,
+        description,
+        unity,
+        createdBy: {
+          admin
+        }
+      })
       const added = await newActivity.save()
-      res.status(201).json({success: true, message: 'created', id: added._id})
+      res.status(201).json({ success: true, message: 'created', id: added._id })
     } catch (e) {
-      res.status(409).json({success: false, message: 'Oops! something went wrong'})
+      res
+        .status(409)
+        .json({ success: false, message: 'Oops! something went wrong' })
     }
   },
-  async pending (req, res, next) {
+  async pending(req, res, next) {
     try {
       const limit = Number(req.query.limit) || 10
       const page = Number(req.query.page) || 1
 
-      const aggregate = Records.aggregate([
+      const aggregate = await Records.aggregate([
         {
-          $match: {'status.approved': { $eq: null }}
+          $match: {
+            'status.approved': {
+              $eq: null
+            }
+          }
         },
         {
           $lookup: {
@@ -273,7 +360,16 @@ export const activity = {
           }
         },
         {
-          $replaceRoot: { newRoot: { $mergeObjects: [ { $arrayElemAt: [ '$activity_doc', 0 ] }, '$$ROOT' ] } }
+          $replaceRoot: {
+            newRoot: {
+              $mergeObjects: [
+                {
+                  $arrayElemAt: ['$activity_doc', 0]
+                },
+                '$$ROOT'
+              ]
+            }
+          }
         },
         {
           $lookup: {
@@ -284,9 +380,22 @@ export const activity = {
           }
         },
         {
-          $replaceRoot: { newRoot: { $mergeObjects: [ { $arrayElemAt: [ '$student_doc', 0 ] }, '$$ROOT' ] } }
+          $replaceRoot: {
+            newRoot: {
+              $mergeObjects: [
+                {
+                  $arrayElemAt: ['$student_doc', 0]
+                },
+                '$$ROOT'
+              ]
+            }
+          }
         },
-        { $sort: { updatedAt: -1 } },
+        {
+          $sort: {
+            updatedAt: -1
+          }
+        },
         {
           $project: {
             _id: '$_id',
@@ -301,29 +410,25 @@ export const activity = {
         }
       ])
 
-      const data = await Records.aggregatePaginate(aggregate, { page, limit })
+      // const data = await Records.aggregatePaginate(aggregate, { page, limit })
 
-      res.status(200).json({
-        docs: data.data,
-        total: data.totalCount,
-        limit,
-        'offset': 0,
-        page,
-        'pages': data.pageCount,
-        timestamp: Date.now()
-      })
+      res.status(200).json(aggregate)
     } catch (e) {
-      res.status(409).json({success: false, message: e})
+      res.status(409).json({ success: false, message: e })
     }
   },
-  async approved (req, res, next) {
+  async approved(req, res, next) {
     try {
       const limit = Number(req.query.limit) || 10
       const page = Number(req.query.page) || 1
 
-      const aggregate = Records.aggregate([
+      const aggregate = await Records.aggregate([
         {
-          $match: {'status.approved': { $eq: true }}
+          $match: {
+            'status.approved': {
+              $eq: true
+            }
+          }
         },
         {
           $lookup: {
@@ -334,7 +439,16 @@ export const activity = {
           }
         },
         {
-          $replaceRoot: { newRoot: { $mergeObjects: [ { $arrayElemAt: [ '$activity_doc', 0 ] }, '$$ROOT' ] } }
+          $replaceRoot: {
+            newRoot: {
+              $mergeObjects: [
+                {
+                  $arrayElemAt: ['$activity_doc', 0]
+                },
+                '$$ROOT'
+              ]
+            }
+          }
         },
         {
           $lookup: {
@@ -345,9 +459,22 @@ export const activity = {
           }
         },
         {
-          $replaceRoot: { newRoot: { $mergeObjects: [ { $arrayElemAt: [ '$student_doc', 0 ] }, '$$ROOT' ] } }
+          $replaceRoot: {
+            newRoot: {
+              $mergeObjects: [
+                {
+                  $arrayElemAt: ['$student_doc', 0]
+                },
+                '$$ROOT'
+              ]
+            }
+          }
         },
-        { $sort: { updatedAt: -1 } },
+        {
+          $sort: {
+            updatedAt: -1
+          }
+        },
         {
           $project: {
             _id: '$_id',
@@ -362,29 +489,25 @@ export const activity = {
         }
       ])
 
-      const data = await Records.aggregatePaginate(aggregate, { page, limit })
+      // const data = await Records.aggregatePaginate(aggregate, { page, limit })
 
-      res.status(200).json({
-        docs: data.data,
-        total: data.totalCount,
-        limit,
-        'offset': 0,
-        page,
-        'pages': data.pageCount,
-        timestamp: Date.now()
-      })
+      res.status(200).json(aggregate)
     } catch (e) {
-      res.status(409).json({success: false, message: e})
+      res.status(409).json({ success: false, message: e })
     }
   },
-  async canceled (req, res, next) {
+  async canceled(req, res, next) {
     try {
       const limit = Number(req.query.limit) || 10
       const page = Number(req.query.page) || 1
 
-      const aggregate = Records.aggregate([
+      const aggregate = await Records.aggregate([
         {
-          $match: {'status.approved': { $eq: false }}
+          $match: {
+            'status.approved': {
+              $eq: false
+            }
+          }
         },
         {
           $lookup: {
@@ -395,7 +518,16 @@ export const activity = {
           }
         },
         {
-          $replaceRoot: { newRoot: { $mergeObjects: [ { $arrayElemAt: [ '$activity_doc', 0 ] }, '$$ROOT' ] } }
+          $replaceRoot: {
+            newRoot: {
+              $mergeObjects: [
+                {
+                  $arrayElemAt: ['$activity_doc', 0]
+                },
+                '$$ROOT'
+              ]
+            }
+          }
         },
         {
           $lookup: {
@@ -406,9 +538,22 @@ export const activity = {
           }
         },
         {
-          $replaceRoot: { newRoot: { $mergeObjects: [ { $arrayElemAt: [ '$student_doc', 0 ] }, '$$ROOT' ] } }
+          $replaceRoot: {
+            newRoot: {
+              $mergeObjects: [
+                {
+                  $arrayElemAt: ['$student_doc', 0]
+                },
+                '$$ROOT'
+              ]
+            }
+          }
         },
-        { $sort: { updatedAt: -1 } },
+        {
+          $sort: {
+            updatedAt: -1
+          }
+        },
         {
           $project: {
             _id: '$_id',
@@ -423,25 +568,23 @@ export const activity = {
         }
       ])
 
-      const data = await Records.aggregatePaginate(aggregate, { page, limit })
+      // const data = await Records.aggregatePaginate(aggregate, { page, limit })
 
-      res.status(200).json({
-        docs: data.data,
-        total: data.totalCount,
-        limit,
-        'offset': 0,
-        page,
-        'pages': data.pageCount,
-        timestamp: Date.now()
-      })
+      res.status(200).json(aggregate)
     } catch (e) {
-      res.status(409).json({success: false, message: e})
+      res.status(409).json({ success: false, message: e })
     }
   },
-  async action (req, res, next) {
+  async action(req, res, next) {
     try {
       const eventId = req.params.id
-      const { scores, approved, approvedWithCondition, approvedBy, comment } = req.body
+      const {
+        scores,
+        approved,
+        approvedWithCondition,
+        approvedBy,
+        comment
+      } = req.body
       const status = {
         approved,
         approvedWithCondition,
@@ -449,9 +592,9 @@ export const activity = {
         comment
       }
 
-      const item = await Records.findOne({'_id': eventId})
-      const activityDetail = await Activities.findOne({'_id': item.activity_id})
-      const student = await Users.findOne({'student_id': item.student_id})
+      const item = await Records.findOne({ _id: eventId })
+      const activityDetail = await Activities.findOne({ _id: item.activity_id })
+      const student = await Users.findOne({ student_id: item.student_id })
 
       const newScore = await grading.save(scores, student.tracking_id)
 
@@ -465,25 +608,46 @@ export const activity = {
       })
 
       if (approved) {
-        await Records.findOneAndUpdate({'_id': eventId}, {scores: newScore, status})
+        await Records.findOneAndUpdate(
+          {
+            _id: eventId
+          },
+          {
+            scores: newScore,
+            status
+          }
+        )
         newNotify.is_approve = true
         await newNotify.save()
       } else {
-        await Records.findOneAndUpdate({'_id': eventId}, {status})
+        await Records.findOneAndUpdate(
+          {
+            _id: eventId
+          },
+          { status }
+        )
         await newNotify.save()
       }
 
-      res.status(200).json({success: true, message: 'updated'})
+      res.status(200).json({ success: true, message: 'updated' })
     } catch (e) {
-      res.status(409).json({success: false, message: e})
+      res.status(409).json({ success: false, message: e })
     }
   },
-  async isApproved (req, res, next) {
+  async isApproved(req, res, next) {
     try {
       let earnedPoint = []
       const eventId = req.params.id
-      const { activity_id, student_id } = await Records.findOne({'_id': eventId})
-      const data = await Records.find({'_id': {$ne: eventId}, activity_id, student_id})
+      const { activity_id, student_id } = await Records.findOne({
+        _id: eventId
+      })
+      const data = await Records.find({
+        _id: {
+          $ne: eventId
+        },
+        activity_id,
+        student_id
+      })
       if (data.length > 0) {
         data.map(eachRecord => {
           eachRecord.scores.map(score => {
@@ -492,21 +656,23 @@ export const activity = {
             }
           })
         })
-        res.status(200).json({success: true, message: earnedPoint})
+        res.status(200).json({ success: true, message: earnedPoint })
       } else {
-        res.status(200).json({success: true, message: null})
+        res.status(200).json({ success: true, message: null })
       }
     } catch (e) {
-      res.status(409).json({success: false, message: e})
+      res.status(409).json({ success: false, message: e })
     }
   },
-  async viewById (req, res, next) {
+  async viewById(req, res, next) {
     try {
       const id = req.params.id
 
       const data = await Records.aggregate([
         {
-          $match: {'_id': ObjectId(id)}
+          $match: {
+            _id: ObjectId(id)
+          }
         },
         {
           $lookup: {
@@ -517,7 +683,16 @@ export const activity = {
           }
         },
         {
-          $replaceRoot: { newRoot: { $mergeObjects: [ { $arrayElemAt: [ '$activity_doc', 0 ] }, '$$ROOT' ] } }
+          $replaceRoot: {
+            newRoot: {
+              $mergeObjects: [
+                {
+                  $arrayElemAt: ['$activity_doc', 0]
+                },
+                '$$ROOT'
+              ]
+            }
+          }
         },
         {
           $lookup: {
@@ -528,7 +703,16 @@ export const activity = {
           }
         },
         {
-          $replaceRoot: { newRoot: { $mergeObjects: [ { $arrayElemAt: [ '$student_doc', 0 ] }, '$$ROOT' ] } }
+          $replaceRoot: {
+            newRoot: {
+              $mergeObjects: [
+                {
+                  $arrayElemAt: ['$student_doc', 0]
+                },
+                '$$ROOT'
+              ]
+            }
+          }
         },
         {
           $project: {
@@ -540,31 +724,37 @@ export const activity = {
 
       res.status(200).json(data)
     } catch (e) {
-      res.status(409).json({success: false, message: e})
+      res.status(409).json({ success: false, message: e })
     }
   }
 }
 /**
-* Course section
-**/
+ * Course section
+ **/
 export const course = {
-  async newBatch (req, res, next) {
+  async newBatch(req, res, next) {
     try {
       const course_id = req.params.id
       const { unity_setting, structure } = req.body
 
-      const result = await Batches.findOne({course_id, is_open: true})
+      const result = await Batches.findOne({ course_id, is_open: true })
 
       if (result) {
-        await Batches.findOneAndUpdate({_id: result._id}, {unity_setting})
-        await Criteria.findOneAndUpdate({batch_id: result._id}, {structure})
-        res.status(200).json({success: true, message: 'updated'})
+        await Batches.findOneAndUpdate(
+          {
+            _id: result._id
+          },
+          { unity_setting }
+        )
+        await Criteria.findOneAndUpdate(
+          {
+            batch_id: result._id
+          },
+          { structure }
+        )
+        res.status(200).json({ success: true, message: 'updated' })
       } else {
-        const batch = new Batches({
-          course_id,
-          unity_setting,
-          is_open: true
-        })
+        const batch = new Batches({ course_id, unity_setting, is_open: true })
         const created = await batch.save()
 
         const rule = new Criteria({
@@ -577,29 +767,46 @@ export const course = {
 
         await rule.save()
 
-        res.status(201).json({success: true, message: 'created', id: created._id})
+        res
+          .status(201)
+          .json({ success: true, message: 'created', id: created._id })
       }
     } catch (e) {
-      res.status(409).json({success: false, message: e})
+      res.status(409).json({ success: false, message: e })
     }
   },
-  async batch (req, res, next) {
+  async batch(req, res, next) {
     try {
       const limit = Number(req.query.limit) || 10
       const page = Number(req.query.page) || 1
 
       const courseId = req.params.id
-      const result = await Batches.paginate({'course_id': courseId, 'is_open': false}, { sort: { updatedAt: -1 }, limit, page })
+      const result = await Batches.paginate(
+        {
+          course_id: courseId,
+          is_open: false
+        },
+        {
+          sort: {
+            updatedAt: -1
+          },
+          limit,
+          page
+        }
+      )
 
-      res.status(200).json({success: true, data: result})
+      res.status(200).json({ success: true, data: result })
     } catch (e) {
-      res.status(409).json({success: false, message: e})
+      res.status(409).json({ success: false, message: e })
     }
   },
-  async checkBatch (req, res, next) {
+  async checkBatch(req, res, next) {
     try {
       const courseId = Number(req.params.id)
-      const result = await Batches.findOne({'course_id': courseId, 'is_open': true})
+      const result = await Batches.findOne({
+        course_id: courseId,
+        is_open: true
+      })
 
       if (!result) {
         res.status(200).json({
@@ -607,7 +814,7 @@ export const course = {
           message: 'Please create new batch to continue..'
         })
       } else {
-        const rule = await Criteria.findOne({'batch_id': result._id})
+        const rule = await Criteria.findOne({ batch_id: result._id })
         res.status(200).json({
           success: true,
           id: result._id,
@@ -618,23 +825,28 @@ export const course = {
         })
       }
     } catch (e) {
-      res.status(409).json({success: false, message: e})
+      res.status(409).json({ success: false, message: e })
     }
   },
-  async batchById (req, res, next) {
+  async batchById(req, res, next) {
     try {
       const batchId = req.params.batch
-      const result = await Batches.findOne({'_id': batchId})
+      const result = await Batches.findOne({ _id: batchId })
 
-      res.status(200).json({success: true, data: result, timestamp: Date.now()})
+      res
+        .status(200)
+        .json({ success: true, data: result, timestamp: Date.now() })
     } catch (e) {
-      res.status(409).json({success: false, message: e})
+      res.status(409).json({ success: false, message: e })
     }
   },
-  async scoreboard (req, res, next) {
+  async scoreboard(req, res, next) {
     try {
       const courseId = Number(req.params.id)
-      const result = await Batches.findOne({'course_id': courseId, 'is_open': true})
+      const result = await Batches.findOne({
+        course_id: courseId,
+        is_open: true
+      })
 
       if (!result) {
         res.status(200).json({
@@ -650,7 +862,13 @@ export const course = {
           $unwind: '$scores'
         },
         {
-          $match: {'createdAt': { $gt: startFrom }, 'course_id': courseId, 'status.approved': true}
+          $match: {
+            createdAt: {
+              $gt: startFrom
+            },
+            course_id: courseId,
+            'status.approved': true
+          }
         },
         {
           $group: {
@@ -666,10 +884,21 @@ export const course = {
           }
         },
         {
-          $replaceRoot: { newRoot: { $mergeObjects: [ { $arrayElemAt: [ '$student_doc', 0 ] }, '$$ROOT' ] } }
+          $replaceRoot: {
+            newRoot: {
+              $mergeObjects: [
+                {
+                  $arrayElemAt: ['$student_doc', 0]
+                },
+                '$$ROOT'
+              ]
+            }
+          }
         },
         {
-          $project: { student_doc: 0 }
+          $project: {
+            student_doc: 0
+          }
         }
       ])
 
@@ -699,13 +928,16 @@ export const course = {
         timestamp: Date.now()
       })
     } catch (e) {
-      res.status(409).json({success: false, message: e})
+      res.status(409).json({ success: false, message: e })
     }
   },
-  async participant (req, res, next) {
+  async participant(req, res, next) {
     try {
       const courseId = Number(req.params.id)
-      const checkBatch = await Batches.findOne({'course_id': courseId, 'is_open': true})
+      const checkBatch = await Batches.findOne({
+        course_id: courseId,
+        is_open: true
+      })
 
       if (!checkBatch) {
         res.status(200).json({
@@ -720,7 +952,13 @@ export const course = {
           $unwind: '$scores'
         },
         {
-          $match: {'createdAt': { $gt: startFrom }, 'course_id': courseId, 'status.approved': true}
+          $match: {
+            createdAt: {
+              $gt: startFrom
+            },
+            course_id: courseId,
+            'status.approved': true
+          }
         },
         {
           $group: {
@@ -736,26 +974,40 @@ export const course = {
           }
         },
         {
-          $replaceRoot: { newRoot: { $mergeObjects: [ { $arrayElemAt: [ '$student_doc', 0 ] }, '$$ROOT' ] } }
+          $replaceRoot: {
+            newRoot: {
+              $mergeObjects: [
+                {
+                  $arrayElemAt: ['$student_doc', 0]
+                },
+                '$$ROOT'
+              ]
+            }
+          }
         },
-        { $sort: { student_id: 1 } },
         {
-          $project: { student_doc: 0 }
+          $sort: {
+            student_id: 1
+          }
+        },
+        {
+          $project: {
+            student_doc: 0
+          }
         }
       ])
 
-      res.status(200).json({
-        success: true,
-        data,
-        timestamp: Date.now()
-      })
+      res.status(200).json({ success: true, data, timestamp: Date.now() })
     } catch (e) {
-      res.status(409).json({success: false, message: e})
+      res.status(409).json({ success: false, message: e })
     }
   },
-  async unity (req, res, next) {
+  async unity(req, res, next) {
     const courseId = Number(req.params.id)
-    const checkBatch = await Batches.findOne({'course_id': courseId, 'is_open': true})
+    const checkBatch = await Batches.findOne({
+      course_id: courseId,
+      is_open: true
+    })
 
     if (!checkBatch) {
       res.status(200).json({
@@ -766,25 +1018,30 @@ export const course = {
     const startFrom = new Date(checkBatch.createdAt).getTime()
 
     const data = await Activities.find({
-      'createdAt': { $gte: startFrom },
-      'unity': true
+      createdAt: {
+        $gte: startFrom
+      },
+      unity: true
     })
 
     res.status(200).json(data)
   },
-  async selectUnity (req, res, next) {
+  async selectUnity(req, res, next) {
     const courseId = Number(req.params.id)
     const { activity_id } = req.body
 
-    await Batches.findOneAndUpdate({'course_id': courseId, 'is_open': true}, {'unity_id': activity_id})
-    res.status(200).json({
-      success: true,
-      message: 'updated!'
-    })
+    await Batches.findOneAndUpdate(
+      {
+        course_id: courseId,
+        is_open: true
+      },
+      { unity_id: activity_id }
+    )
+    res.status(200).json({ success: true, message: 'updated!' })
   },
-  async checkout (req, res, next) {
+  async checkout(req, res, next) {
     const courseId = Number(req.params.id)
-    const batch = await Batches.findOne({'course_id': courseId, 'is_open': true})
+    const batch = await Batches.findOne({ course_id: courseId, is_open: true })
     const startFrom = batch.createdAt
 
     let buffer = []
@@ -795,7 +1052,13 @@ export const course = {
         $unwind: '$scores'
       },
       {
-        $match: {'createdAt': { $gt: startFrom }, 'course_id': courseId, 'status.approved': true}
+        $match: {
+          createdAt: {
+            $gt: startFrom
+          },
+          course_id: courseId,
+          'status.approved': true
+        }
       },
       {
         $group: {
@@ -811,10 +1074,21 @@ export const course = {
         }
       },
       {
-        $replaceRoot: { newRoot: { $mergeObjects: [ { $arrayElemAt: [ '$student_doc', 0 ] }, '$$ROOT' ] } }
+        $replaceRoot: {
+          newRoot: {
+            $mergeObjects: [
+              {
+                $arrayElemAt: ['$student_doc', 0]
+              },
+              '$$ROOT'
+            ]
+          }
+        }
       },
       {
-        $project: { student_doc: 0 }
+        $project: {
+          student_doc: 0
+        }
       }
     ])
 
@@ -831,10 +1105,10 @@ export const course = {
       // Update each student's tracking course
       await Users.findOneAndUpdate(
         {
-          'student_id': student._id
+          student_id: student._id
         },
         {
-          'tracking': 0,
+          tracking: 0,
           $push: {
             history: {
               course_id: courseId,
@@ -842,14 +1116,18 @@ export const course = {
               scores
             }
           }
-        })
+        }
+      )
       counter++
     }
 
     const sorted = _.sortBy(buffer, ['student_id'])
 
     // save batch detail
-    await Batches.findOneAndUpdate({'_id': ObjectId(batch._id)},
+    await Batches.findOneAndUpdate(
+      {
+        _id: ObjectId(batch._id)
+      },
       {
         is_open: false,
         checkoutAt: Date.now(),
@@ -858,17 +1136,13 @@ export const course = {
       }
     )
 
-    res.status(200).json({
-      success: true,
-      message: 'updated!',
-      id: batch._id
-    })
+    res.status(200).json({ success: true, message: 'updated!', id: batch._id })
   },
-  async exportData (req, res, next) {
+  async exportData(req, res, next) {
     const batchId = req.params.batch
 
-    const batchDetail = await Batches.findOne({'_id': ObjectId(batchId)})
-    const { structure } = await Criteria.findOne({'batch_id': batchId})
+    const batchDetail = await Batches.findOne({ _id: ObjectId(batchId) })
+    const { structure } = await Criteria.findOne({ batch_id: batchId })
 
     let rowHeader = ['Course']
 
@@ -879,24 +1153,26 @@ export const course = {
     rowHeader = [...rowHeader]
 
     // Create the excel report.
-    const report = excel.buildExport(
-      [
-        {
-          name: 'Scoreboard',
-          heading: sheets.scoreboard.heading(batchDetail),
-          merges: sheets.scoreboard.merges(),
-          specification: sheets.scoreboard.spec(),
-          data: sheets.scoreboard.data(batchDetail.student_list)
-        },
-        {
-          name: 'Detail',
-          heading: sheets.detail.heading(batchDetail),
-          merges: sheets.detail.merges(),
-          specification: sheets.detail.spec(rowHeader),
-          data: sheets.detail.data(batchDetail.student_list, structure, batchDetail.course_id)
-        }
-      ]
-    )
+    const report = excel.buildExport([
+      {
+        name: 'Scoreboard',
+        heading: sheets.scoreboard.heading(batchDetail),
+        merges: sheets.scoreboard.merges(),
+        specification: sheets.scoreboard.spec(),
+        data: sheets.scoreboard.data(batchDetail.student_list)
+      },
+      {
+        name: 'Detail',
+        heading: sheets.detail.heading(batchDetail),
+        merges: sheets.detail.merges(),
+        specification: sheets.detail.spec(rowHeader),
+        data: sheets.detail.data(
+          batchDetail.student_list,
+          structure,
+          batchDetail.course_id
+        )
+      }
+    ])
 
     const filename = `${batchDetail.course_id}_${batchId}.xlsx`
 

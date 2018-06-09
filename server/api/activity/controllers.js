@@ -28,7 +28,7 @@ export const user = {
       }
     } else if (req.query.page) {
       try {
-        const events = await Activities.paginate({isAvailable: true}, { sort: { date: -1 }, limit: 10, page: req.query.page })
+        const events = await Activities.paginate({isAvailable: true}, { sort: { startAt: -1 }, limit: 10, page: req.query.page })
         // console.log(events)
         res.status(201).json(events)
       } catch (e) {
@@ -36,7 +36,7 @@ export const user = {
       }
     } else {
       try {
-        const events = await Activities.paginate({isAvailable: true}, { sort: { date: -1 }, limit: 10 })
+        const events = await Activities.paginate({isAvailable: true}, { sort: { startAt: -1 }, limit: 10 })
         // console.log(events)
         res.status(201).json(events)
       } catch (e) {

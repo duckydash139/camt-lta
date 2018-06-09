@@ -8,6 +8,14 @@
           </router-link>
         </div>
       </div>
+      <div class="columns is-unselectable left-menu-item" :class="{ 'is-active': menu.zero.isActive }" @click="toggle(menu.zero)">
+        <div class="column is-4 has-text-right">
+          <b-icon pack="fa" icon="binoculars"></b-icon>
+        </div>
+        <div class="column has-text-left is-size-5 has-text-centered">
+          Records
+        </div>
+      </div>
       <div class="columns is-unselectable left-menu-item" :class="{ 'is-active': menu.first.isActive }" @click="toggle(menu.first)">
         <div class="column is-4 has-text-right">
           <b-icon pack="fa" icon="binoculars"></b-icon>
@@ -55,7 +63,7 @@
         </div>
         <div class="column is-5 right-conner">
           logged in as&nbsp;<b>{{this.$store.state.admin.username}}</b>
-          <router-link to="/admin/activities" class="right-conner-item has-text-weight-bold">
+          <router-link to="/admin/records" class="right-conner-item has-text-weight-bold">
             <b-icon pack="fa" icon="home"></b-icon>
           </router-link>
           <a @click="signout" class="right-conner-item has-text-weight-bold">
@@ -79,6 +87,10 @@ export default {
   data () {
     return {
       menu: {
+        zero: {
+          isActive: false,
+          to: '/admin/records'
+        },
         first: {
           isActive: false,
           to: '/admin/activities'

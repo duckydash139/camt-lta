@@ -282,7 +282,7 @@ export const index = {
         ...isParticipant
       ], 'createdAt').reverse()
 
-      let totalPage = Math.floor(allRecords.length / 10)
+      let totalPage = Math.ceil(allRecords.length / 10)
       if (req.query.page) {
         const result = {
           docs: paginate(allRecords, 10, req.query.page),

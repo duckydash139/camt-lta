@@ -88,7 +88,7 @@ export default {
 
       if (data.success && data.id) {
         loading.close()
-        this.$router.push(`history/${data.id}`)
+        this.$router.push(data.id)
       }
     }
   }

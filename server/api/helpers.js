@@ -169,8 +169,23 @@ export const grading = {
   },
   async student (studentId, courseId) {
     let result = []
-    // const student = await Users.findOne({student_id: studentId})
-    const data = await Records.find({'student_id': studentId, 'batch_id': courseId, 'status.approved': true})
+    // find user's id
+    const { _id } = await Users.findOne({
+      student_id: studentId
+    })
+    // find records that created by this user
+    const normalRecords = await Records.find({
+      student_id: studentId
+    })
+    // find records that this user is participant
+    const isParticipant = await Records.find({
+      participants: ObjectId(_id),
+      student_id: !studentId
+    })
+    const data = _.sortBy([
+      ...normalRecords,
+      ...isParticipant
+    ], 'createdAt').reverse()
     const criteria = await Criteria.findOne({batch_id: courseId})
 
     for (let item of data) {

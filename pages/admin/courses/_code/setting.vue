@@ -96,7 +96,8 @@ export default {
           title: item.title,
           max: item.max,
           formula,
-          color: item.color
+          color: item.color,
+          report: item.report
         })
 
         counter++
