@@ -103,7 +103,7 @@ export const actions = {
 
     const { success, id } = result.data
     if (success === true && id) {
-      this.app.router.push(`/history/requests/${id}`)
+      this.app.router.push(`/history/records/${id}`)
       // clear data
       dispatch('clearForm')
     } else {
