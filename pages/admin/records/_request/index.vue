@@ -162,7 +162,7 @@ export default {
       }
 
       if (this.detail.status.approved !== null) {
-        this.$router.push(`/admin/activities/${id}/view`)
+        this.$router.push(`/admin/records/${id}/view`)
       }
     },
     submitData () {
