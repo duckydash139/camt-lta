@@ -90,7 +90,7 @@ export const actions = {
     }
     // loop participants to fill in form
     for (let k = 0; k < payload.participants.length; k++) {
-      const item = payload.participants[j]
+      const item = payload.participants[k]
       data.append(`participants[${k}]`, item)
     }
     // submit data to api

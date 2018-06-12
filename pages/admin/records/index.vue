@@ -78,6 +78,7 @@ export default {
         'student_id',
         'first_name',
         'last_name',
+        'course_id',
         'activity_title'
       ],
       pending: [],
